@@ -40,9 +40,9 @@ local function computeScale()
     local sy = (vp.Y * 0.9) / BASE_H
     local s  = math.min(sx, sy)
     if isMobile() then
-        return math.clamp(s, 0.62, 1.0)
+        return math.clamp(s, 0.55, 1.0)
     end
-    return math.clamp(s, 0.7, 1.0)
+    return math.clamp(s, 0.65, 1.0)
 end
 
 if not KEY_SYSTEM_ENABLED then
@@ -200,7 +200,7 @@ logoText.Font = Enum.Font.GothamBold
 logoText.Parent = logo
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -170, 0, 20)
+title.Size = UDim2.new(1, -190, 0, 20)
 title.Position = UDim2.fromOffset(72, 16)
 title.BackgroundTransparency = 1
 title.Text = "Kuro Hub"
@@ -211,7 +211,7 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, -170, 0, 14)
+subtitle.Size = UDim2.new(1, -190, 0, 14)
 subtitle.Position = UDim2.fromOffset(72, 36)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "Masukkan access key untuk melanjutkan"
@@ -221,17 +221,32 @@ subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = header
 
-local function makeIconButton(text, xOffset, hoverBg, hoverText)
+local headerBtns = Instance.new("Frame")
+headerBtns.Name = "HeaderButtons"
+headerBtns.AnchorPoint = Vector2.new(1, 0)
+headerBtns.Position = UDim2.new(1, -16, 0, 18)
+headerBtns.Size = UDim2.fromOffset(112, 32)
+headerBtns.BackgroundTransparency = 1
+headerBtns.Parent = header
+
+local headerBtnLayout = Instance.new("UIListLayout")
+headerBtnLayout.FillDirection = Enum.FillDirection.Horizontal
+headerBtnLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+headerBtnLayout.Padding = UDim.new(0, 6)
+headerBtnLayout.SortOrder = Enum.SortOrder.LayoutOrder
+headerBtnLayout.Parent = headerBtns
+
+local function makeIconButton(text, hoverBg, hoverText, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.fromOffset(32, 32)
-    btn.Position = UDim2.new(1, xOffset, 0, 18)
     btn.BackgroundColor3 = C.surface
     btn.AutoButtonColor = false
     btn.Text = text
     btn.TextColor3 = C.textMuted
     btn.TextSize = 16
     btn.Font = Enum.Font.GothamBold
-    btn.Parent = header
+    btn.LayoutOrder = order
+    btn.Parent = headerBtns
 
     local c = Instance.new("UICorner")
     c.CornerRadius = UDim.new(0, 8)
@@ -248,8 +263,9 @@ local function makeIconButton(text, xOffset, hoverBg, hoverText)
     return btn
 end
 
-local minimizeBtn = makeIconButton("−", -80, C.surfaceAlt, C.text)
-local closeBtn    = makeIconButton("×", -42, C.danger, Color3.new(1, 1, 1))
+local settingsBtn = makeIconButton("⚙", C.surfaceAlt, C.text, 1)
+local minimizeBtn = makeIconButton("−", C.surfaceAlt, C.text, 2)
+local closeBtn    = makeIconButton("×", C.danger, Color3.new(1, 1, 1), 3)
 
 local divider = Instance.new("Frame")
 divider.Size = UDim2.new(1, -40, 0, 1)
@@ -437,7 +453,68 @@ infoLabel.TextYAlignment = Enum.TextYAlignment.Top
 infoLabel.TextXAlignment = Enum.TextXAlignment.Left
 infoLabel.Parent = infoCard
 
+local settingsPanel = Instance.new("Frame")
+settingsPanel.Name = "SettingsPanel"
+settingsPanel.Size = UDim2.new(1, -40, 1, -HEADER_H - 20)
+settingsPanel.Position = UDim2.fromOffset(20, HEADER_H + 20)
+settingsPanel.BackgroundTransparency = 1
+settingsPanel.Visible = false
+settingsPanel.Parent = main
+
+local settingsTitle = Instance.new("TextLabel")
+settingsTitle.Size = UDim2.new(1, 0, 0, 24)
+settingsTitle.BackgroundTransparency = 1
+settingsTitle.Text = "Settings"
+settingsTitle.TextColor3 = C.text
+settingsTitle.TextSize = 15
+settingsTitle.Font = Enum.Font.GothamBold
+settingsTitle.TextXAlignment = Enum.TextXAlignment.Left
+settingsTitle.Parent = settingsPanel
+
+local settingsDesc = Instance.new("TextLabel")
+settingsDesc.Size = UDim2.new(1, 0, 0, 16)
+settingsDesc.Position = UDim2.fromOffset(0, 28)
+settingsDesc.BackgroundTransparency = 1
+settingsDesc.Text = "Pengaturan Kuro Hub akan tersedia di sini."
+settingsDesc.TextColor3 = C.textMuted
+settingsDesc.TextSize = 11
+settingsDesc.Font = Enum.Font.Gotham
+settingsDesc.TextXAlignment = Enum.TextXAlignment.Left
+settingsDesc.Parent = settingsPanel
+
+local settingsCard = Instance.new("Frame")
+settingsCard.Size = UDim2.new(1, 0, 0, 120)
+settingsCard.Position = UDim2.fromOffset(0, 60)
+settingsCard.BackgroundColor3 = C.surface
+settingsCard.BorderSizePixel = 0
+settingsCard.Parent = settingsPanel
+
+local settingsCardCorner = Instance.new("UICorner")
+settingsCardCorner.CornerRadius = UDim.new(0, 12)
+settingsCardCorner.Parent = settingsCard
+
+local settingsCardStroke = Instance.new("UIStroke")
+settingsCardStroke.Color = C.border
+settingsCardStroke.Thickness = 1
+settingsCardStroke.Transparency = 0.6
+settingsCardStroke.Parent = settingsCard
+
+local settingsHint = Instance.new("TextLabel")
+settingsHint.Size = UDim2.new(1, -28, 1, -28)
+settingsHint.Position = UDim2.fromOffset(14, 14)
+settingsHint.BackgroundTransparency = 1
+settingsHint.Text = "Belum ada pengaturan.\nNanti bisa ditambah di sini:\n- Toggle fitur\n- Keybind\n- Tema"
+settingsHint.TextColor3 = C.textMuted
+settingsHint.TextSize = 11
+settingsHint.Font = Enum.Font.Gotham
+settingsHint.LineHeight = 1.4
+settingsHint.TextWrapped = true
+settingsHint.TextYAlignment = Enum.TextYAlignment.Top
+settingsHint.TextXAlignment = Enum.TextXAlignment.Left
+settingsHint.Parent = settingsCard
+
 local isMinimized = false
+local isSettingsOpen = false
 local normalSize = UDim2.fromOffset(BASE_W, BASE_H)
 local minimizedSize = UDim2.fromOffset(BASE_W, HEADER_H)
 
@@ -446,15 +523,30 @@ local function toggleMinimize()
     if isMinimized then
         TweenService:Create(main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = minimizedSize}):Play()
         content.Visible = false
+        settingsPanel.Visible = false
         divider.Visible = false
     else
-        content.Visible = true
+        content.Visible = not isSettingsOpen
+        settingsPanel.Visible = isSettingsOpen
         divider.Visible = true
         TweenService:Create(main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = normalSize}):Play()
     end
 end
 
+local function toggleSettings()
+    if isMinimized then return end
+    isSettingsOpen = not isSettingsOpen
+    if isSettingsOpen then
+        content.Visible = false
+        settingsPanel.Visible = true
+    else
+        content.Visible = true
+        settingsPanel.Visible = false
+    end
+end
+
 minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+settingsBtn.MouseButton1Click:Connect(toggleSettings)
 
 closeBtn.MouseButton1Click:Connect(function()
     TweenService:Create(main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
