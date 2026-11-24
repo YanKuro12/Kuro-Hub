@@ -1,6 +1,13 @@
 local UserInputService = game:GetService("UserInputService")
 local TweenService      = game:GetService("TweenService")
 local CoreGui           = game:GetService("CoreGui")
+local HttpService       = game:GetService("HttpService")
+
+local KEY_SYSTEM_ENABLED = false
+
+local LUARMOR_SCRIPT_ID = "ISI_SCRIPT_ID_LUARMOR_KAMU"
+local KEY_FILE          = "kuro_key.txt"
+local SCRIPT_URL        = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/script.lua"
 
 local C = {
     bg          = Color3.fromRGB(16, 16, 22),
@@ -36,6 +43,84 @@ local function computeScale()
         return math.clamp(s, 0.62, 1.0)
     end
     return math.clamp(s, 0.7, 1.0)
+end
+
+if not KEY_SYSTEM_ENABLED then
+    loadstring(game:HttpGet(SCRIPT_URL))()
+    return
+end
+
+local LuarmorAPI
+do
+    local ok, lib = pcall(function()
+        return loadstring(game:HttpGet("https://sdkapi-public.luarmor.net/library.lua"))()
+    end)
+    if ok and lib then
+        LuarmorAPI = lib
+        LuarmorAPI.script_id = LUARMOR_SCRIPT_ID
+    else
+        warn("[Kuro] Gagal load Luarmor library")
+    end
+end
+
+local function readKeyFile()
+    if not (isfile and isfile(KEY_FILE)) then return nil end
+    local ok, content = pcall(readfile, KEY_FILE)
+    if not ok or not content or content == "" then return nil end
+    return content
+end
+
+local function saveKeyFile(key)
+    if not writefile then return false end
+    return pcall(writefile, KEY_FILE, key)
+end
+
+local function deleteKeyFile()
+    if delfile and isfile and isfile(KEY_FILE) then
+        pcall(delfile, KEY_FILE)
+    end
+end
+
+local function verifyKey(inputKey)
+    if not LuarmorAPI then
+        return false, "Library Luarmor gagal dimuat"
+    end
+    if not inputKey or inputKey == "" then
+        return false, "Key kosong"
+    end
+
+    local ok, status = pcall(function()
+        return LuarmorAPI.check_key(inputKey)
+    end)
+    if not ok or not status then
+        return false, "Gagal cek key"
+    end
+
+    if status.code == "KEY_VALID" then
+        return true, "OK"
+    elseif status.code == "KEY_HWID_LOCKED" then
+        return false, "Key sudah dipakai di device lain"
+    elseif status.code == "KEY_INCORRECT" then
+        return false, "Key salah"
+    elseif status.code == "KEY_EXPIRED" then
+        return false, "Key expired"
+    else
+        return false, "Verifikasi gagal: " .. tostring(status.code)
+    end
+end
+
+local function tryAutoLogin()
+    local savedKey = readKeyFile()
+    if not savedKey then return false end
+    local valid, _ = verifyKey(savedKey)
+    if valid then return true end
+    deleteKeyFile()
+    return false
+end
+
+if tryAutoLogin() then
+    loadstring(game:HttpGet(SCRIPT_URL))()
+    return
 end
 
 local gui = Instance.new("ScreenGui")
@@ -342,7 +427,7 @@ local infoLabel = Instance.new("TextLabel")
 infoLabel.Size = UDim2.new(1, -28, 1, -28)
 infoLabel.Position = UDim2.fromOffset(14, 14)
 infoLabel.BackgroundTransparency = 1
-infoLabel.Text = "Belum punya key?\nGabung Discord kami untuk mendapatkannya gratis.\n\ndiscord.gg/kurodev"
+infoLabel.Text = "Belum punya key?\nGabung Discord kami, lalu kerjakan misi untuk mendapat key gratis.\n\ndiscord.gg/kurodev"
 infoLabel.TextColor3 = C.textMuted
 infoLabel.TextSize = 11
 infoLabel.Font = Enum.Font.Gotham
@@ -360,7 +445,6 @@ local function toggleMinimize()
     isMinimized = not isMinimized
     if isMinimized then
         TweenService:Create(main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = minimizedSize}):Play()
-        TweenService:Create(content, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
         content.Visible = false
         divider.Visible = false
     else
@@ -382,24 +466,43 @@ closeBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
-local VALID_KEY = "WAFZONEX"
+local function loadMainScript()
+    if gui then gui:Destroy() end
+    loadstring(game:HttpGet(SCRIPT_URL))()
+end
 
 submitBtn.MouseButton1Click:Connect(function()
-    if keyBox.Text == VALID_KEY then
+    local inputKey = keyBox.Text
+    if inputKey == "" then
+        statusLabel.Text = "Key kosong"
+        return
+    end
+
+    submitBtn.Text = "Memeriksa..."
+    submitBtn.Active = false
+
+    local valid, msg = verifyKey(inputKey)
+
+    if valid then
         statusLabel.Text = "Terverifikasi"
         statusDot.BackgroundColor3 = C.success
         submitBtn.Text = "Verified ✓"
         submitBtn.BackgroundColor3 = C.success
         TweenService:Create(keyStroke, TweenInfo.new(0.2), {Color = C.success}):Play()
+
+        saveKeyFile(inputKey)
         task.wait(0.6)
-        gui:Destroy()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/script.lua"))()
+        loadMainScript()
     else
-        statusLabel.Text = "Key salah"
+        statusLabel.Text = msg
         statusDot.BackgroundColor3 = C.danger
         keyBox.Text = ""
         keyStroke.Color = C.danger
         TweenService:Create(keyStroke, TweenInfo.new(0.4), {Color = C.border}):Play()
+
+        submitBtn.Text = "Verifikasi Key"
+        submitBtn.Active = true
+
         local origPos = main.Position
         for i = 1, 6 do
             local dx = (i % 2 == 0) and 8 or -8
@@ -423,12 +526,12 @@ local function flashButton(btn, label)
 end
 
 copyBtn.MouseButton1Click:Connect(function()
-    setclipboard("https://discord.gg/kurodev")
+    if setclipboard then setclipboard("https://discord.gg/kurodev") end
     flashButton(copyBtn, "Copy Discord")
 end)
 
 getBtn.MouseButton1Click:Connect(function()
-    setclipboard("https://discord.gg/kurodev")
+    if setclipboard then setclipboard("https://discord.gg/kurodev") end
     flashButton(getBtn, "Get Key")
 end)
 
