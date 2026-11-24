@@ -2,26 +2,102 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService      = game:GetService("TweenService")
 local CoreGui           = game:GetService("CoreGui")
 local HttpService       = game:GetService("HttpService")
+local Lighting          = game:GetService("Lighting")
 
 local KEY_SYSTEM_ENABLED = false
 
 local LUARMOR_SCRIPT_ID = "ISI_SCRIPT_ID_LUARMOR_KAMU"
 local KEY_FILE          = "kuro_key.txt"
+local SETTINGS_FILE     = "kuro_settings.json"
 local SCRIPT_URL        = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/script.lua"
+
+local THEMES = {
+    { name = "Indigo",  accent = Color3.fromRGB(99, 102, 241),  hover = Color3.fromRGB(129, 132, 255) },
+    { name = "Emerald", accent = Color3.fromRGB(16, 185, 129),  hover = Color3.fromRGB(52, 211, 153) },
+    { name = "Rose",    accent = Color3.fromRGB(244, 63, 94),   hover = Color3.fromRGB(251, 113, 133) },
+    { name = "Amber",   accent = Color3.fromRGB(245, 158, 11),  hover = Color3.fromRGB(251, 191, 36) },
+    { name = "Sky",     accent = Color3.fromRGB(14, 165, 233),  hover = Color3.fromRGB(56, 189, 248) },
+    { name = "Violet",  accent = Color3.fromRGB(168, 85, 247),  hover = Color3.fromRGB(192, 132, 252) },
+}
 
 local C = {
     bg          = Color3.fromRGB(16, 16, 22),
     surface     = Color3.fromRGB(24, 24, 32),
     surfaceAlt  = Color3.fromRGB(32, 32, 42),
     border      = Color3.fromRGB(52, 52, 70),
-    accent      = Color3.fromRGB(99, 102, 241),
-    accentHover = Color3.fromRGB(129, 132, 255),
+    accent      = THEMES[1].accent,
+    accentHover = THEMES[1].hover,
     text        = Color3.fromRGB(235, 235, 245),
     textMuted   = Color3.fromRGB(140, 140, 165),
     success     = Color3.fromRGB(52, 211, 153),
     danger      = Color3.fromRGB(248, 113, 113),
     dangerHover = Color3.fromRGB(255, 140, 140),
 }
+
+local SETTINGS = {
+    fpsBooster   = false,
+    lowGraphics  = false,
+    themeIndex   = 1,
+    uiScale      = 1.0,
+}
+
+local function loadSettings()
+    if not (isfile and isfile(SETTINGS_FILE)) then return end
+    local ok, content = pcall(readfile, SETTINGS_FILE)
+    if not ok or not content or content == "" then return end
+    local ok2, data = pcall(function() return HttpService:JSONDecode(content) end)
+    if not ok2 or type(data) ~= "table" then return end
+    for k, v in pairs(data) do
+        if SETTINGS[k] ~= nil then SETTINGS[k] = v end
+    end
+    if THEMES[SETTINGS.themeIndex] then
+        C.accent = THEMES[SETTINGS.themeIndex].accent
+        C.accentHover = THEMES[SETTINGS.themeIndex].hover
+    end
+end
+
+local function saveSettings()
+    if not writefile then return end
+    local ok, encoded = pcall(function() return HttpService:JSONEncode(SETTINGS) end)
+    if ok then pcall(writefile, SETTINGS_FILE, encoded) end
+end
+
+loadSettings()
+
+local function applyFPSBooster(state)
+    pcall(function()
+        settings().Rendering.QualityLevel = state and Enum.QualityLevel.Level01 or Enum.QualityLevel.Level10
+    end)
+    pcall(function()
+        for _, obj in ipairs(Lighting:GetDescendants()) do
+            if obj:IsA("PostEffect") or obj:IsA("Atmosphere") or obj:IsA("Sky") then
+                obj.Enabled = not state
+            end
+        end
+    end)
+end
+
+local function applyLowGraphics(state)
+    pcall(function()
+        Lighting.GlobalShadows = not state
+        Lighting.FogEnd = state and 100000 or 100000
+        Lighting.Brightness = state and 1 or 2
+    end)
+    pcall(function()
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                obj.Enabled = not state
+            end
+        end
+    end)
+    pcall(function()
+        local terrain = workspace:FindFirstChildOfClass("Terrain")
+        if terrain then terrain.Decoration = not state end
+    end)
+end
+
+if SETTINGS.fpsBooster then applyFPSBooster(true) end
+if SETTINGS.lowGraphics then applyLowGraphics(true) end
 
 local function isMobile()
     return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -39,10 +115,8 @@ local function computeScale()
     local sx = (vp.X * 0.9) / BASE_W
     local sy = (vp.Y * 0.9) / BASE_H
     local s  = math.min(sx, sy)
-    if isMobile() then
-        return math.clamp(s, 0.55, 1.0)
-    end
-    return math.clamp(s, 0.65, 1.0)
+    local minS = isMobile() and 0.5 or 0.65
+    return math.clamp(s, minS, 1.0) * SETTINGS.uiScale
 end
 
 if not KEY_SYSTEM_ENABLED then
@@ -82,31 +156,15 @@ local function deleteKeyFile()
 end
 
 local function verifyKey(inputKey)
-    if not LuarmorAPI then
-        return false, "Library Luarmor gagal dimuat"
-    end
-    if not inputKey or inputKey == "" then
-        return false, "Key kosong"
-    end
-
-    local ok, status = pcall(function()
-        return LuarmorAPI.check_key(inputKey)
-    end)
-    if not ok or not status then
-        return false, "Gagal cek key"
-    end
-
-    if status.code == "KEY_VALID" then
-        return true, "OK"
-    elseif status.code == "KEY_HWID_LOCKED" then
-        return false, "Key sudah dipakai di device lain"
-    elseif status.code == "KEY_INCORRECT" then
-        return false, "Key salah"
-    elseif status.code == "KEY_EXPIRED" then
-        return false, "Key expired"
-    else
-        return false, "Verifikasi gagal: " .. tostring(status.code)
-    end
+    if not LuarmorAPI then return false, "Library Luarmor gagal dimuat" end
+    if not inputKey or inputKey == "" then return false, "Key kosong" end
+    local ok, status = pcall(function() return LuarmorAPI.check_key(inputKey) end)
+    if not ok or not status then return false, "Gagal cek key" end
+    if status.code == "KEY_VALID" then return true, "OK"
+    elseif status.code == "KEY_HWID_LOCKED" then return false, "Key sudah dipakai di device lain"
+    elseif status.code == "KEY_INCORRECT" then return false, "Key salah"
+    elseif status.code == "KEY_EXPIRED" then return false, "Key expired"
+    else return false, "Verifikasi gagal: " .. tostring(status.code) end
 end
 
 local function tryAutoLogin()
@@ -459,59 +517,369 @@ settingsPanel.Size = UDim2.new(1, -40, 1, -HEADER_H - 20)
 settingsPanel.Position = UDim2.fromOffset(20, HEADER_H + 20)
 settingsPanel.BackgroundTransparency = 1
 settingsPanel.Visible = false
+settingsPanel.ClipsDescendants = true
 settingsPanel.Parent = main
 
-local settingsTitle = Instance.new("TextLabel")
-settingsTitle.Size = UDim2.new(1, 0, 0, 24)
-settingsTitle.BackgroundTransparency = 1
-settingsTitle.Text = "Settings"
-settingsTitle.TextColor3 = C.text
-settingsTitle.TextSize = 15
-settingsTitle.Font = Enum.Font.GothamBold
-settingsTitle.TextXAlignment = Enum.TextXAlignment.Left
-settingsTitle.Parent = settingsPanel
+local settingsScroll = Instance.new("ScrollingFrame")
+settingsScroll.Size = UDim2.new(1, 0, 1, 0)
+settingsScroll.BackgroundTransparency = 1
+settingsScroll.BorderSizePixel = 0
+settingsScroll.ScrollBarThickness = 4
+settingsScroll.ScrollBarImageColor3 = C.border
+settingsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+settingsScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+settingsScroll.Parent = settingsPanel
 
-local settingsDesc = Instance.new("TextLabel")
-settingsDesc.Size = UDim2.new(1, 0, 0, 16)
-settingsDesc.Position = UDim2.fromOffset(0, 28)
-settingsDesc.BackgroundTransparency = 1
-settingsDesc.Text = "Pengaturan Kuro Hub akan tersedia di sini."
-settingsDesc.TextColor3 = C.textMuted
-settingsDesc.TextSize = 11
-settingsDesc.Font = Enum.Font.Gotham
-settingsDesc.TextXAlignment = Enum.TextXAlignment.Left
-settingsDesc.Parent = settingsPanel
+local settingsLayout = Instance.new("UIListLayout")
+settingsLayout.Padding = UDim.new(0, 10)
+settingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+settingsLayout.Parent = settingsScroll
 
-local settingsCard = Instance.new("Frame")
-settingsCard.Size = UDim2.new(1, 0, 0, 120)
-settingsCard.Position = UDim2.fromOffset(0, 60)
-settingsCard.BackgroundColor3 = C.surface
-settingsCard.BorderSizePixel = 0
-settingsCard.Parent = settingsPanel
+local function makeSection(titleText, order)
+    local section = Instance.new("Frame")
+    section.Size = UDim2.new(1, -8, 0, 20)
+    section.BackgroundTransparency = 1
+    section.LayoutOrder = order
+    section.Parent = settingsScroll
 
-local settingsCardCorner = Instance.new("UICorner")
-settingsCardCorner.CornerRadius = UDim.new(0, 12)
-settingsCardCorner.Parent = settingsCard
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.fromScale(1, 1)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = titleText
+    lbl.TextColor3 = C.text
+    lbl.TextSize = 13
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = section
 
-local settingsCardStroke = Instance.new("UIStroke")
-settingsCardStroke.Color = C.border
-settingsCardStroke.Thickness = 1
-settingsCardStroke.Transparency = 0.6
-settingsCardStroke.Parent = settingsCard
+    return section
+end
 
-local settingsHint = Instance.new("TextLabel")
-settingsHint.Size = UDim2.new(1, -28, 1, -28)
-settingsHint.Position = UDim2.fromOffset(14, 14)
-settingsHint.BackgroundTransparency = 1
-settingsHint.Text = "Belum ada pengaturan.\nNanti bisa ditambah di sini:\n- Toggle fitur\n- Keybind\n- Tema"
-settingsHint.TextColor3 = C.textMuted
-settingsHint.TextSize = 11
-settingsHint.Font = Enum.Font.Gotham
-settingsHint.LineHeight = 1.4
-settingsHint.TextWrapped = true
-settingsHint.TextYAlignment = Enum.TextYAlignment.Top
-settingsHint.TextXAlignment = Enum.TextXAlignment.Left
-settingsHint.Parent = settingsCard
+local function makeToggle(labelText, initialState, onChange, order)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -8, 0, 44)
+    row.BackgroundColor3 = C.surface
+    row.BorderSizePixel = 0
+    row.LayoutOrder = order
+    row.Parent = settingsScroll
+
+    local rc = Instance.new("UICorner")
+    rc.CornerRadius = UDim.new(0, 10)
+    rc.Parent = row
+
+    local rs = Instance.new("UIStroke")
+    rs.Color = C.border
+    rs.Thickness = 1
+    rs.Parent = row
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -80, 1, 0)
+    lbl.Position = UDim2.fromOffset(14, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = labelText
+    lbl.TextColor3 = C.text
+    lbl.TextSize = 12
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = row
+
+    local track = Instance.new("Frame")
+    track.AnchorPoint = Vector2.new(1, 0.5)
+    track.Position = UDim2.new(1, -14, 0.5, 0)
+    track.Size = UDim2.fromOffset(44, 24)
+    track.BackgroundColor3 = initialState and C.accent or C.surfaceAlt
+    track.BorderSizePixel = 0
+    track.Parent = row
+
+    local tc = Instance.new("UICorner")
+    tc.CornerRadius = UDim.new(1, 0)
+    tc.Parent = track
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.fromOffset(18, 18)
+    knob.Position = initialState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+    knob.BackgroundColor3 = Color3.new(1, 1, 1)
+    knob.BorderSizePixel = 0
+    knob.Parent = track
+
+    local kc = Instance.new("UICorner")
+    kc.CornerRadius = UDim.new(1, 0)
+    kc.Parent = knob
+
+    local state = initialState
+    local clickable = Instance.new("TextButton")
+    clickable.Size = UDim2.fromScale(1, 1)
+    clickable.BackgroundTransparency = 1
+    clickable.Text = ""
+    clickable.Parent = row
+
+    clickable.MouseButton1Click:Connect(function()
+        state = not state
+        TweenService:Create(knob, TweenInfo.new(0.18, Enum.EasingStyle.Quad), {
+            Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+        }):Play()
+        TweenService:Create(track, TweenInfo.new(0.18), {
+            BackgroundColor3 = state and C.accent or C.surfaceAlt
+        }):Play()
+        onChange(state)
+    end)
+
+    return row, function() return state end
+end
+
+local function makeButtonRow(labelText, buttonText, onClick, order)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -8, 0, 44)
+    row.BackgroundColor3 = C.surface
+    row.BorderSizePixel = 0
+    row.LayoutOrder = order
+    row.Parent = settingsScroll
+
+    local rc = Instance.new("UICorner")
+    rc.CornerRadius = UDim.new(0, 10)
+    rc.Parent = row
+
+    local rs = Instance.new("UIStroke")
+    rs.Color = C.border
+    rs.Thickness = 1
+    rs.Parent = row
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -120, 1, 0)
+    lbl.Position = UDim2.fromOffset(14, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = labelText
+    lbl.TextColor3 = C.text
+    lbl.TextSize = 12
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = row
+
+    local btn = Instance.new("TextButton")
+    btn.AnchorPoint = Vector2.new(1, 0.5)
+    btn.Position = UDim2.new(1, -14, 0.5, 0)
+    btn.Size = UDim2.fromOffset(90, 28)
+    btn.BackgroundColor3 = C.accent
+    btn.AutoButtonColor = false
+    btn.Text = buttonText
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = row
+
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(0, 8)
+    bc.Parent = btn
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = C.accentHover}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = C.accent}):Play()
+    end)
+    btn.MouseButton1Click:Connect(onClick)
+
+    return row
+end
+
+local sectionPerf = makeSection("PERFORMA", 1)
+makeToggle("FPS Booster", SETTINGS.fpsBooster, function(state)
+    SETTINGS.fpsBooster = state
+    applyFPSBooster(state)
+    saveSettings()
+end, 2)
+makeToggle("Grafik Low (HP Kentang)", SETTINGS.lowGraphics, function(state)
+    SETTINGS.lowGraphics = state
+    applyLowGraphics(state)
+    saveSettings()
+end, 3)
+
+local sectionTheme = makeSection("TEMA WARNA", 4)
+
+local themeRow = Instance.new("Frame")
+themeRow.Size = UDim2.new(1, -8, 0, 76)
+themeRow.BackgroundColor3 = C.surface
+themeRow.BorderSizePixel = 0
+themeRow.LayoutOrder = 5
+themeRow.Parent = settingsScroll
+
+local themeRowCorner = Instance.new("UICorner")
+themeRowCorner.CornerRadius = UDim.new(0, 10)
+themeRowCorner.Parent = themeRow
+
+local themeRowStroke = Instance.new("UIStroke")
+themeRowStroke.Color = C.border
+themeRowStroke.Thickness = 1
+themeRowStroke.Parent = themeRow
+
+local themeGrid = Instance.new("Frame")
+themeGrid.Size = UDim2.new(1, -20, 1, -20)
+themeGrid.Position = UDim2.fromOffset(10, 10)
+themeGrid.BackgroundTransparency = 1
+themeGrid.Parent = themeRow
+
+local themeLayout = Instance.new("UIListLayout")
+themeLayout.FillDirection = Enum.FillDirection.Horizontal
+themeLayout.Padding = UDim.new(0, 8)
+themeLayout.SortOrder = Enum.SortOrder.LayoutOrder
+themeLayout.Parent = themeGrid
+
+for i, theme in ipairs(THEMES) do
+    local sw = Instance.new("TextButton")
+    sw.Size = UDim2.fromOffset(38, 38)
+    sw.BackgroundColor3 = theme.accent
+    sw.AutoButtonColor = false
+    sw.Text = (i == SETTINGS.themeIndex) and "✓" or ""
+    sw.TextColor3 = Color3.new(1, 1, 1)
+    sw.TextSize = 16
+    sw.Font = Enum.Font.GothamBold
+    sw.LayoutOrder = i
+    sw.Parent = themeGrid
+
+    local swc = Instance.new("UICorner")
+    swc.CornerRadius = UDim.new(1, 0)
+    swc.Parent = sw
+
+    local sws = Instance.new("UIStroke")
+    sws.Color = (i == SETTINGS.themeIndex) and Color3.new(1, 1, 1) or C.border
+    sws.Thickness = (i == SETTINGS.themeIndex) and 2 or 1
+    sws.Parent = sw
+
+    sw.MouseButton1Click:Connect(function()
+        SETTINGS.themeIndex = i
+        C.accent = theme.accent
+        C.accentHover = theme.hover
+
+        for _, child in ipairs(themeGrid:GetChildren()) do
+            if child:IsA("TextButton") then
+                local idx = child.LayoutOrder
+                child.Text = (idx == i) and "✓" or ""
+                local s = child:FindFirstChildOfClass("UIStroke")
+                if s then
+                    s.Color = (idx == i) and Color3.new(1, 1, 1) or C.border
+                    s.Thickness = (idx == i) and 2 or 1
+                end
+            end
+        end
+
+        logo.BackgroundColor3 = C.accent
+        submitBtn.BackgroundColor3 = C.accent
+        settingsBtn.MouseEnter:Connect(function() end)
+        for _, obj in ipairs({logo}) do
+            if obj.BackgroundColor3 then obj.BackgroundColor3 = C.accent end
+        end
+
+        saveSettings()
+    end)
+end
+
+local sectionSize = makeSection("UKURAN TAMPILAN", 6)
+
+local sizeRow = Instance.new("Frame")
+sizeRow.Size = UDim2.new(1, -8, 0, 64)
+sizeRow.BackgroundColor3 = C.surface
+sizeRow.BorderSizePixel = 0
+sizeRow.LayoutOrder = 7
+sizeRow.Parent = settingsScroll
+
+local sizeRowCorner = Instance.new("UICorner")
+sizeRowCorner.CornerRadius = UDim.new(0, 10)
+sizeRowCorner.Parent = sizeRow
+
+local sizeRowStroke = Instance.new("UIStroke")
+sizeRowStroke.Color = C.border
+sizeRowStroke.Thickness = 1
+sizeRowStroke.Parent = sizeRow
+
+local sizeLabel = Instance.new("TextLabel")
+sizeLabel.Size = UDim2.new(1, -28, 0, 20)
+sizeLabel.Position = UDim2.fromOffset(14, 8)
+sizeLabel.BackgroundTransparency = 1
+sizeLabel.Text = "Skala UI: " .. string.format("%.0f%%", SETTINGS.uiScale * 100)
+sizeLabel.TextColor3 = C.text
+sizeLabel.TextSize = 12
+sizeLabel.Font = Enum.Font.GothamMedium
+sizeLabel.TextXAlignment = Enum.TextXAlignment.Left
+sizeLabel.Parent = sizeRow
+
+local sizeBtns = Instance.new("Frame")
+sizeBtns.Size = UDim2.new(1, -28, 0, 26)
+sizeBtns.Position = UDim2.fromOffset(14, 30)
+sizeBtns.BackgroundTransparency = 1
+sizeBtns.Parent = sizeRow
+
+local sizeLayout = Instance.new("UIListLayout")
+sizeLayout.FillDirection = Enum.FillDirection.Horizontal
+sizeLayout.Padding = UDim.new(0, 6)
+sizeLayout.Parent = sizeBtns
+
+local SIZE_PRESETS = {
+    { label = "Kecil",   value = 0.75 },
+    { label = "Sedang",  value = 1.0 },
+    { label = "Besar",   value = 1.25 },
+}
+
+for i, preset in ipairs(SIZE_PRESETS) do
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0.33, -4, 1, 0)
+    b.BackgroundColor3 = (math.abs(SETTINGS.uiScale - preset.value) < 0.01) and C.accent or C.surfaceAlt
+    b.AutoButtonColor = false
+    b.Text = preset.label
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.TextSize = 11
+    b.Font = Enum.Font.GothamSemibold
+    b.LayoutOrder = i
+    b.Parent = sizeBtns
+
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(0, 8)
+    bc.Parent = b
+
+    b.MouseButton1Click:Connect(function()
+        SETTINGS.uiScale = preset.value
+        sizeLabel.Text = "Skala UI: " .. string.format("%.0f%%", preset.value * 100)
+        for _, child in ipairs(sizeBtns:GetChildren()) do
+            if child:IsA("TextButton") then
+                local idx = child.LayoutOrder
+                child.BackgroundColor3 = (idx == i) and C.accent or C.surfaceAlt
+            end
+        end
+        refreshScale()
+        saveSettings()
+    end)
+end
+
+local sectionInfo = makeSection("INFO", 8)
+
+local infoRow = Instance.new("Frame")
+infoRow.Size = UDim2.new(1, -8, 0, 64)
+infoRow.BackgroundColor3 = C.surface
+infoRow.BorderSizePixel = 0
+infoRow.LayoutOrder = 9
+infoRow.Parent = settingsScroll
+
+local infoRowCorner = Instance.new("UICorner")
+infoRowCorner.CornerRadius = UDim.new(0, 10)
+infoRowCorner.Parent = infoRow
+
+local infoRowStroke = Instance.new("UIStroke")
+infoRowStroke.Color = C.border
+infoRowStroke.Thickness = 1
+infoRowStroke.Parent = infoRow
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1, -28, 1, -16)
+infoText.Position = UDim2.fromOffset(14, 8)
+infoText.BackgroundTransparency = 1
+infoText.Text = "Kuro Hub v1.0\nSettings tersimpan otomatis."
+infoText.TextColor3 = C.textMuted
+infoText.TextSize = 11
+infoText.Font = Enum.Font.Gotham
+infoText.LineHeight = 1.3
+infoText.TextWrapped = true
+infoText.TextYAlignment = Enum.TextYAlignment.Top
+infoText.TextXAlignment = Enum.TextXAlignment.Left
+infoText.Parent = infoRow
 
 local isMinimized = false
 local isSettingsOpen = false
@@ -569,19 +937,15 @@ submitBtn.MouseButton1Click:Connect(function()
         statusLabel.Text = "Key kosong"
         return
     end
-
     submitBtn.Text = "Memeriksa..."
     submitBtn.Active = false
-
     local valid, msg = verifyKey(inputKey)
-
     if valid then
         statusLabel.Text = "Terverifikasi"
         statusDot.BackgroundColor3 = C.success
         submitBtn.Text = "Verified ✓"
         submitBtn.BackgroundColor3 = C.success
         TweenService:Create(keyStroke, TweenInfo.new(0.2), {Color = C.success}):Play()
-
         saveKeyFile(inputKey)
         task.wait(0.6)
         loadMainScript()
@@ -591,10 +955,8 @@ submitBtn.MouseButton1Click:Connect(function()
         keyBox.Text = ""
         keyStroke.Color = C.danger
         TweenService:Create(keyStroke, TweenInfo.new(0.4), {Color = C.border}):Play()
-
         submitBtn.Text = "Verifikasi Key"
         submitBtn.Active = true
-
         local origPos = main.Position
         for i = 1, 6 do
             local dx = (i % 2 == 0) and 8 or -8
@@ -606,9 +968,7 @@ submitBtn.MouseButton1Click:Connect(function()
 end)
 
 keyBox.FocusLost:Connect(function(enter)
-    if enter then
-        submitBtn:Fire("MouseButton1Click")
-    end
+    if enter then submitBtn:Fire("MouseButton1Click") end
 end)
 
 local function flashButton(btn, label)
@@ -637,18 +997,14 @@ local function clampPosition(pos)
     local h = (isMinimized and HEADER_H or BASE_H) * scale
     local halfW = w / 2
     local halfH = h / 2
-
     local px = pos.X.Offset
     local py = pos.Y.Offset
     local cx = vp.X / 2
     local cy = vp.Y / 2
-
     local absX = cx + px
     local absY = cy + py
-
     absX = math.clamp(absX, halfW + 8, vp.X - halfW - 8)
     absY = math.clamp(absY, halfH + 8, vp.Y - halfH - 8)
-
     return UDim2.new(0.5, absX - cx, 0.5, absY - cy)
 end
 
