@@ -4,13 +4,15 @@ local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
+-- TEMA WARNA BARU (MIDNIGHT NEON)
 local Themes = {
-    Blue = {accent = Color3.fromRGB(0, 140, 255), surface = Color3.fromRGB(22, 28, 40), bg = Color3.fromRGB(15, 18, 26)},
-    Purple = {accent = Color3.fromRGB(160, 80, 255), surface = Color3.fromRGB(28, 22, 40), bg = Color3.fromRGB(18, 14, 26)},
-    Green = {accent = Color3.fromRGB(50, 220, 120), surface = Color3.fromRGB(20, 35, 28), bg = Color3.fromRGB(14, 22, 18)},
-    Red = {accent = Color3.fromRGB(255, 70, 70), surface = Color3.fromRGB(38, 22, 22), bg = Color3.fromRGB(24, 14, 14)},
-    Yellow = {accent = Color3.fromRGB(255, 200, 50), surface = Color3.fromRGB(35, 32, 20), bg = Color3.fromRGB(22, 20, 14)}
+    Blue = {accent = Color3.fromRGB(0, 200, 255), surface = Color3.fromRGB(18, 24, 38), bg = Color3.fromRGB(10, 14, 22)},
+    Purple = {accent = Color3.fromRGB(190, 80, 255), surface = Color3.fromRGB(24, 18, 38), bg = Color3.fromRGB(12, 10, 20)},
+    Green = {accent = Color3.fromRGB(50, 255, 150), surface = Color3.fromRGB(16, 28, 22), bg = Color3.fromRGB(8, 16, 12)},
+    Red = {accent = Color3.fromRGB(255, 60, 80), surface = Color3.fromRGB(32, 16, 20), bg = Color3.fromRGB(18, 8, 10)},
+    Yellow = {accent = Color3.fromRGB(255, 220, 50), surface = Color3.fromRGB(30, 26, 16), bg = Color3.fromRGB(16, 14, 8)}
 }
 
 local CurrentTheme = "Blue"
@@ -18,27 +20,27 @@ local IsMinimized = false
 local CurrentTab = "Status"
 
 local C = {
-    bg = Themes.Blue.bg, surface = Themes.Blue.surface, surfaceAlt = Color3.fromRGB(30, 38, 55),
-    border = Color3.fromRGB(45, 55, 75), accent = Themes.Blue.accent,
-    text = Color3.fromRGB(255, 255, 255), textMuted = Color3.fromRGB(140, 150, 170),
+    bg = Themes.Blue.bg, surface = Themes.Blue.surface, surfaceAlt = Color3.fromRGB(28, 36, 52),
+    border = Color3.fromRGB(45, 65, 95), accent = Themes.Blue.accent,
+    text = Color3.fromRGB(255, 255, 255), textMuted = Color3.fromRGB(160, 175, 195),
 }
 
 local function tween(obj, time, props, style)
     return TS:Create(obj, TweenInfo.new(time, style or Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props)
 end
 
+-- FUNGSI BUAT KARTU DENGAN EFFECT HOVER NEON
 local function createCard(parent, titleText, descText, toggleInitial, callback)
     local card = Instance.new("Frame")
     card.Size = UDim2.new(1, -10, 0, 85)
     card.BackgroundColor3 = C.surface
     card.Parent = parent
     
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 8)
-    c.Parent = card
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 8) c.Parent = card
     
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.border
+    stroke.Thickness = 1
     stroke.Parent = card
     
     local t = Instance.new("TextLabel")
@@ -74,19 +76,13 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
     toggle.Text = ""
     toggle.Parent = card
     
-    local tc = Instance.new("UICorner")
-    tc.CornerRadius = UDim.new(1, 0)
-    tc.Parent = toggle
-    
+    local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(1, 0) tc.Parent = toggle
     local knob = Instance.new("Frame")
     knob.Size = UDim2.fromOffset(16, 16)
     knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
     knob.BackgroundColor3 = Color3.new(1,1,1)
     knob.Parent = toggle
-    
-    local kc = Instance.new("UICorner")
-    kc.CornerRadius = UDim.new(1, 0)
-    kc.Parent = knob
+    local kc = Instance.new("UICorner") kc.CornerRadius = UDim.new(1, 0) kc.Parent = knob
     
     local state = toggleInitial
     toggle.MouseButton1Click:Connect(function()
@@ -96,10 +92,18 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
         if callback then callback(state) end
     end)
     
-    card.MouseEnter:Connect(function() tween(stroke, 0.15, {Color = C.accent}):Play() end)
-    card.MouseLeave:Connect(function() tween(stroke, 0.15, {Color = C.border}):Play() end)
+    -- Efek Hover Nyala
+    card.MouseEnter:Connect(function() 
+        tween(stroke, 0.2, {Color = C.accent, Thickness = 2}):Play() 
+        tween(card, 0.2, {BackgroundColor3 = C.surfaceAlt}):Play()
+    end)
+    card.MouseLeave:Connect(function() 
+        tween(stroke, 0.2, {Color = C.border, Thickness = 1}):Play() 
+        tween(card, 0.2, {BackgroundColor3 = C.surface}):Play()
+    end)
 end
 
+-- SETUP GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "KuroHubUI"
 gui.ResetOnSpawn = false
@@ -118,27 +122,22 @@ main.Active = true
 main.ClipsDescendants = true
 main.Parent = gui
 
+local uiScale = Instance.new("UIScale")
+uiScale.Parent = main
+
 local function updateScale()
     local vp = workspace.CurrentCamera.ViewportSize
     local sx = (vp.X * 0.9) / 500
     local sy = (vp.Y * 0.8) / 380
-    main.UIScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.0)
+    uiScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.0)
 end
-
-local uiScale = Instance.new("UIScale")
-uiScale.Parent = main
 updateScale()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
-mainCorner.Parent = main
+local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 12) mainCorner.Parent = main
+local mainStroke = Instance.new("UIStroke") mainStroke.Color = C.border mainStroke.Thickness = 1 mainStroke.Parent = main
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = C.border
-mainStroke.Thickness = 1
-mainStroke.Parent = main
-
+-- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 45)
 header.BackgroundColor3 = C.surface
@@ -165,7 +164,7 @@ btnContainer.BackgroundTransparency = 1
 btnContainer.Parent = header
 local btnLayout = Instance.new("UIListLayout") btnLayout.FillDirection = Enum.FillDirection.Horizontal btnLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right btnLayout.Padding = UDim.new(0, 5) btnLayout.Parent = btnContainer
 
-local function createHeaderBtn(icon, order)
+local function createHeaderBtn(icon, order, hoverColor)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.fromOffset(25, 25)
     btn.BackgroundColor3 = C.surfaceAlt
@@ -177,27 +176,30 @@ local function createHeaderBtn(icon, order)
     btn.LayoutOrder = order
     btn.Parent = btnContainer
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
-    btn.MouseEnter:Connect(function() tween(btn, 0.1, {BackgroundColor3 = C.accent}):Play() end)
-    btn.MouseLeave:Connect(function() tween(btn, 0.1, {BackgroundColor3 = C.surfaceAlt}):Play() end)
+    local stroke = Instance.new("UIStroke") stroke.Color = Color3.new(0,0,0) stroke.Transparency = 1 stroke.Parent = btn
+    
+    btn.MouseEnter:Connect(function() 
+        tween(btn, 0.1, {BackgroundColor3 = hoverColor}):Play()
+        tween(stroke, 0.1, {Transparency = 0, Color = hoverColor}):Play()
+    end)
+    btn.MouseLeave:Connect(function() 
+        tween(btn, 0.1, {BackgroundColor3 = C.surfaceAlt}):Play()
+        tween(stroke, 0.1, {Transparency = 1}):Play()
+    end)
     return btn
 end
 
-local setBtn = createHeaderBtn("⚙", 1)
-local minBtn = createHeaderBtn("−", 2)
-local closeBtn = createHeaderBtn("×", 3)
+local setBtn = createHeaderBtn("⚙", 1, C.accent)
+local minBtn = createHeaderBtn("−", 2, C.accent)
+local closeBtn = createHeaderBtn("×", 3, Color3.fromRGB(255, 60, 80))
 
+-- TABS
 local tabBar = Instance.new("Frame")
 tabBar.Size = UDim2.new(1, -30, 0, 32)
 tabBar.Position = UDim2.fromOffset(15, 55)
 tabBar.BackgroundTransparency = 1
 tabBar.Parent = main
-
-local tabScroll = Instance.new("ScrollingFrame")
-tabScroll.Size = UDim2.fromScale(1, 1)
-tabScroll.BackgroundTransparency = 1
-tabScroll.ScrollBarThickness = 0
-tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0)
-tabScroll.Parent = tabBar
+local tabScroll = Instance.new("ScrollingFrame") tabScroll.Size = UDim2.fromScale(1, 1) tabScroll.BackgroundTransparency = 1 tabScroll.ScrollBarThickness = 0 tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0) tabScroll.Parent = tabBar
 local tabLayout = Instance.new("UIListLayout") tabLayout.FillDirection = Enum.FillDirection.Horizontal tabLayout.Padding = UDim.new(0, 5) tabLayout.Parent = tabScroll
 
 local content = Instance.new("Frame")
@@ -256,91 +258,27 @@ local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
 statusGui.ScrollBarThickness = 0
 
-local profileContainer = Instance.new("Frame")
-profileContainer.Size = UDim2.new(1, -10, 0, 50)
-profileContainer.BackgroundTransparency = 1
-profileContainer.Parent = statusGui
-
-local avatar = Instance.new("ImageLabel")
-avatar.Size = UDim2.fromOffset(45, 45)
-avatar.BackgroundColor3 = C.surface
-avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=150&h=150"
-avatar.Parent = profileContainer
+local profileContainer = Instance.new("Frame") profileContainer.Size = UDim2.new(1, -10, 0, 50) profileContainer.BackgroundTransparency = 1 profileContainer.Parent = statusGui
+local avatar = Instance.new("ImageLabel") avatar.Size = UDim2.fromOffset(45, 45) avatar.BackgroundColor3 = C.surface avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=150&h=150" avatar.Parent = profileContainer
 local avCorner = Instance.new("UICorner") avCorner.CornerRadius = UDim.new(1, 0) avCorner.Parent = avatar
-
-local greet = Instance.new("TextLabel")
-greet.Size = UDim2.new(1, -60, 0, 20)
-greet.Position = UDim2.fromOffset(55, 5)
-greet.BackgroundTransparency = 1
-greet.Text = "Hi, " .. LP.DisplayName
-greet.TextColor3 = C.text
-greet.Font = Enum.Font.GothamBold
-greet.TextSize = 15
-greet.TextXAlignment = Enum.TextXAlignment.Left
-greet.Parent = profileContainer
-
-local subGreet = Instance.new("TextLabel")
-subGreet.Size = UDim2.new(1, -60, 0, 15)
-subGreet.Position = UDim2.fromOffset(55, 25)
-subGreet.BackgroundTransparency = 1
-subGreet.Text = "User: " .. LP.Name
-subGreet.TextColor3 = C.textMuted
-subGreet.Font = Enum.Font.Gotham
-subGreet.TextSize = 11
-subGreet.TextXAlignment = Enum.TextXAlignment.Left
-subGreet.Parent = profileContainer
+local greet = Instance.new("TextLabel") greet.Size = UDim2.new(1, -60, 0, 20) greet.Position = UDim2.fromOffset(55, 5) greet.BackgroundTransparency = 1 greet.Text = "Hi, " .. LP.DisplayName greet.TextColor3 = C.text greet.Font = Enum.Font.GothamBold greet.TextSize = 15 greet.TextXAlignment = Enum.TextXAlignment.Left greet.Parent = profileContainer
+local subGreet = Instance.new("TextLabel") subGreet.Size = UDim2.new(1, -60, 0, 15) subGreet.Position = UDim2.fromOffset(55, 25) subGreet.BackgroundTransparency = 1 subGreet.Text = "User: " .. LP.Name subGreet.TextColor3 = C.textMuted subGreet.Font = Enum.Font.Gotham subGreet.TextSize = 11 subGreet.TextXAlignment = Enum.TextXAlignment.Left subGreet.Parent = profileContainer
 
 local function createBigBox(titleText)
-    local box = Instance.new("Frame")
-    box.Size = UDim2.new(1, -10, 0, 0)
-    box.AutomaticSize = Enum.AutomaticSize.Y
-    box.BackgroundColor3 = C.surface
-    box.Parent = statusGui
+    local box = Instance.new("Frame") box.Size = UDim2.new(1, -10, 0, 0) box.AutomaticSize = Enum.AutomaticSize.Y box.BackgroundColor3 = C.surface box.Parent = statusGui
     local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 8) bc.Parent = box
-    local bs = Instance.new("UIStroke") bs.Color = C.border bs.Parent = box
+    local bs = Instance.new("UIStroke") bs.Color = C.border bs.Thickness = 1 bs.Parent = box
     local pad = Instance.new("UIPadding") pad.PaddingTop = UDim.new(0, 8) pad.PaddingBottom = UDim.new(0, 8) pad.PaddingLeft = UDim.new(0, 8) pad.PaddingRight = UDim.new(0, 8) pad.Parent = box
     local layout = Instance.new("UIListLayout") layout.Padding = UDim.new(0, 8) layout.Parent = box
-
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 15)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = titleText
-    lbl.TextColor3 = C.textMuted
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 10
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = box
+    local lbl = Instance.new("TextLabel") lbl.Size = UDim2.new(1, 0, 0, 15) lbl.BackgroundTransparency = 1 lbl.Text = titleText lbl.TextColor3 = C.accent lbl.Font = Enum.Font.GothamBold lbl.TextSize = 11 lbl.TextXAlignment = Enum.TextXAlignment.Left lbl.Parent = box
     return box
 end
 
 local function addSmallStat(parent, titleText, initialVal)
-    local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, 0, 0, 25)
-    row.BackgroundColor3 = C.surfaceAlt
-    row.Parent = parent
+    local row = Instance.new("Frame") row.Size = UDim2.new(1, 0, 0, 25) row.BackgroundColor3 = C.surfaceAlt row.Parent = parent
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 5) c.Parent = row
-    
-    local t = Instance.new("TextLabel")
-    t.Size = UDim2.new(0.5, -5, 1, 0)
-    t.Position = UDim2.fromOffset(8, 0)
-    t.BackgroundTransparency = 1
-    t.Text = titleText
-    t.TextColor3 = C.textMuted
-    t.Font = Enum.Font.Gotham
-    t.TextSize = 10
-    t.TextXAlignment = Enum.TextXAlignment.Left
-    t.Parent = row
-
-    local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0.5, -5, 1, 0)
-    v.Position = UDim2.new(0.5, 5, 0, 0)
-    v.BackgroundTransparency = 1
-    v.Text = initialVal
-    v.TextColor3 = C.text
-    v.Font = Enum.Font.GothamBold
-    v.TextSize = 10
-    v.TextXAlignment = Enum.TextXAlignment.Right
-    v.Parent = row
+    local t = Instance.new("TextLabel") t.Size = UDim2.new(0.5, -5, 1, 0) t.Position = UDim2.fromOffset(8, 0) t.BackgroundTransparency = 1 t.Text = titleText t.TextColor3 = C.textMuted t.Font = Enum.Font.Gotham t.TextSize = 10 t.TextXAlignment = Enum.TextXAlignment.Left t.Parent = row
+    local v = Instance.new("TextLabel") v.Size = UDim2.new(0.5, -5, 1, 0) v.Position = UDim2.new(0.5, 5, 0, 0) v.BackgroundTransparency = 1 v.Text = initialVal v.TextColor3 = C.text v.Font = Enum.Font.GothamBold v.TextSize = 10 v.TextXAlignment = Enum.TextXAlignment.Right v.Parent = row
     return v
 end
 
@@ -353,7 +291,7 @@ local valFrag = addSmallStat(accGrid, "Fragments", "...")
 
 local srvGrid = createBigBox("SERVER STATS")
 addSmallStat(srvGrid, "Place ID", tostring(game.PlaceId))
-local valSession = addSmallStat(srvGrid, "Session Time", "...")
+local valSession = addSmallStat(srvGrid, "Session", "...")
 local valServerAge = addSmallStat(srvGrid, "Server Age", "...")
 local valPrehistoric = addSmallStat(srvGrid, "Prehistoric", "...")
 local valMirage = addSmallStat(srvGrid, "Mirage", "...")
@@ -376,89 +314,44 @@ task.spawn(function()
             valServerAge.Text = formatTime(workspace.DistributedGameTime)
             
             valPrehistoric.Text = (WS:FindFirstChild("Prehistoric Island") or WS:FindFirstChild("PrehistoricIsland")) and "ACTIVE" or "Not Found"
-            valPrehistoric.TextColor3 = valPrehistoric.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+            valPrehistoric.TextColor3 = valPrehistoric.Text == "ACTIVE" and C.accent or C.text
             valMirage.Text = (WS:FindFirstChild("Mirage Island") or WS:FindFirstChild("MirageIsland")) and "ACTIVE" or "Not Found"
-            valMirage.TextColor3 = valMirage.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+            valMirage.TextColor3 = valMirage.Text == "ACTIVE" and C.accent or C.text
             valElite.Text = (WS:FindFirstChild("Elite Hunter") or WS:FindFirstChild("EliteHunter")) and "ACTIVE" or "Not Found"
-            valElite.TextColor3 = valElite.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+            valElite.TextColor3 = valElite.Text == "ACTIVE" and C.accent or C.text
         end)
     end
 end)
 
 -- SETTINGS
-local settingsPanel = Instance.new("Frame")
-settingsPanel.Size = UDim2.new(1, -30, 1, -100)
-settingsPanel.Position = UDim2.fromOffset(15, 95)
-settingsPanel.BackgroundColor3 = C.bg
-settingsPanel.Visible = false
-settingsPanel.Parent = main
+local settingsPanel = Instance.new("Frame") settingsPanel.Size = UDim2.new(1, -30, 1, -100) settingsPanel.Position = UDim2.fromOffset(15, 95) settingsPanel.BackgroundColor3 = C.bg settingsPanel.Visible = false settingsPanel.Parent = main
 local spCorner = Instance.new("UICorner") spCorner.CornerRadius = UDim.new(0, 8) spCorner.Parent = settingsPanel
-
-local spScroll = Instance.new("ScrollingFrame")
-spScroll.Size = UDim2.fromScale(1,1)
-spScroll.BackgroundTransparency = 1
-spScroll.ScrollBarThickness = 2
-spScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-spScroll.Parent = settingsPanel
+local spScroll = Instance.new("ScrollingFrame") spScroll.Size = UDim2.fromScale(1,1) spScroll.BackgroundTransparency = 1 spScroll.ScrollBarThickness = 2 spScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y spScroll.Parent = settingsPanel
 local spLayout = Instance.new("UIListLayout") spLayout.Padding = UDim.new(0, 10) spLayout.Parent = spScroll
 local spPad = Instance.new("UIPadding") spPad.PaddingTop = UDim.new(0, 10) spPad.PaddingLeft = UDim.new(0, 10) spPad.PaddingRight = UDim.new(0, 10) spPad.Parent = spScroll
 
-local themeCard = Instance.new("Frame")
-themeCard.Size = UDim2.new(1, 0, 0, 80)
-themeCard.BackgroundColor3 = C.surface
-themeCard.Parent = spScroll
+local themeCard = Instance.new("Frame") themeCard.Size = UDim2.new(1, 0, 0, 80) themeCard.BackgroundColor3 = C.surface themeCard.Parent = spScroll
 local tcCorner = Instance.new("UICorner") tcCorner.CornerRadius = UDim.new(0,8) tcCorner.Parent = themeCard
-local themeLbl = Instance.new("TextLabel")
-themeLbl.Size = UDim2.new(1, -20, 0, 20)
-themeLbl.Position = UDim2.fromOffset(10, 8)
-themeLbl.BackgroundTransparency = 1
-themeLbl.Text = "Change Theme"
-themeLbl.TextColor3 = C.text
-themeLbl.Font = Enum.Font.GothamBold
-themeLbl.TextSize = 12
-themeLbl.TextXAlignment = Enum.TextXAlignment.Left
-themeLbl.Parent = themeCard
+local themeLbl = Instance.new("TextLabel") themeLbl.Size = UDim2.new(1, -20, 0, 20) themeLbl.Position = UDim2.fromOffset(10, 8) themeLbl.BackgroundTransparency = 1 themeLbl.Text = "Change Theme" themeLbl.TextColor3 = C.text themeLbl.Font = Enum.Font.GothamBold themeLbl.TextSize = 12 themeLbl.TextXAlignment = Enum.TextXAlignment.Left themeLbl.Parent = themeCard
 
 for i, tName in ipairs({"Blue", "Purple", "Green", "Red", "Yellow"}) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(50, 20)
-    btn.Position = UDim2.fromOffset(10 + ((i-1)*56), 40)
-    btn.BackgroundColor3 = Themes[tName].accent
-    btn.Text = tName
-    btn.TextColor3 = Color3.new(0,0,0)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 9
-    btn.Parent = themeCard
+    local btn = Instance.new("TextButton") btn.Size = UDim2.fromOffset(50, 20) btn.Position = UDim2.fromOffset(10 + ((i-1)*56), 40) btn.BackgroundColor3 = Themes[tName].accent btn.Text = tName btn.TextColor3 = Color3.new(0,0,0) btn.Font = Enum.Font.GothamBold btn.TextSize = 9 btn.Parent = themeCard
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 4) c.Parent = btn
     btn.MouseButton1Click:Connect(function()
-        C.accent = Themes[tName].accent
-        C.surface = Themes[tName].surface
-        C.bg = Themes[tName].bg
-        main.BackgroundColor3 = C.bg
-        header.BackgroundColor3 = C.surface
-        headerFix.BackgroundColor3 = C.surface
+        C.accent = Themes[tName].accent; C.surface = Themes[tName].surface; C.bg = Themes[tName].bg
+        main.BackgroundColor3 = C.bg; header.BackgroundColor3 = C.surface; headerFix.BackgroundColor3 = C.surface
+        mainStroke.Color = C.border
         for _, t in pairs(tabButtons) do t.BackgroundColor3 = (t.Text == CurrentTab) and C.accent or C.surface end
     end)
 end
 
-local hideBtn = Instance.new("TextButton")
-hideBtn.Size = UDim2.new(1, 0, 0, 30)
-hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-hideBtn.Text = "Sembunyikan Hub (Hide)"
-hideBtn.TextColor3 = Color3.new(1,1,1)
-hideBtn.Font = Enum.Font.GothamBold
-hideBtn.Parent = spScroll
+local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, 0, 0, 30) hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) hideBtn.Text = "Sembunyikan Hub (Hide)" hideBtn.TextColor3 = Color3.new(1,1,1) hideBtn.Font = Enum.Font.GothamBold hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0,8) hc.Parent = hideBtn
-
 hideBtn.MouseButton1Click:Connect(function()
     settingsPanel.Visible = false
     IsMinimized = true
     tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-    tabBar.Visible = false
-    content.Visible = false
-    title.Text = "Kuro Island"
-    title.TextSize = 13
-    minBtn.Text = "□"
+    tabBar.Visible = false; content.Visible = false; title.Text = "Kuro Island"; title.TextSize = 13; minBtn.Text = "□"
 end)
 
 -- BUTTON EVENTS
@@ -467,18 +360,10 @@ minBtn.MouseButton1Click:Connect(function()
     IsMinimized = not IsMinimized
     if IsMinimized then
         tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = false
-        content.Visible = false
-        title.Text = "Kuro Island"
-        title.TextSize = 13
-        minBtn.Text = "□"
+        tabBar.Visible = false; content.Visible = false; title.Text = "Kuro Island"; title.TextSize = 13; minBtn.Text = "□"
     else
         tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = true
-        content.Visible = true
-        title.Text = "Kuro Hub | Blox Fruits"
-        title.TextSize = 14
-        minBtn.Text = "−"
+        tabBar.Visible = true; content.Visible = true; title.Text = "Kuro Hub | Blox Fruits"; title.TextSize = 14; minBtn.Text = "−"
     end
 end)
 
@@ -486,11 +371,7 @@ main.InputBegan:Connect(function(input)
     if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         IsMinimized = false
         tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = true
-        content.Visible = true
-        title.Text = "Kuro Hub | Blox Fruits"
-        title.TextSize = 14
-        minBtn.Text = "−"
+        tabBar.Visible = true; content.Visible = true; title.Text = "Kuro Hub | Blox Fruits"; title.TextSize = 14; minBtn.Text = "−"
     end
 end)
 
@@ -508,6 +389,7 @@ closeBtn.MouseButton1Click:Connect(function()
     closeTween.Completed:Connect(function() gui:Destroy() end)
 end)
 
+-- DRAG & RESIZE
 local dragging = false
 local dragInput, dragStart, startPos
 header.InputBegan:Connect(function(input)
@@ -526,7 +408,6 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- RESIZE LOGIC (Bisa di drag ujung kanan bawah)
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.fromOffset(15, 15)
 resizeBtn.Position = UDim2.new(1, -15, 1, -15)
@@ -539,20 +420,14 @@ local resizing = false
 local resizeStart, startSize
 resizeBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = true
-        resizeStart = input.Position
-        startSize = main.Size
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then resizing = false end
-        end)
+        resizing = true; resizeStart = input.Position; startSize = main.Size
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then resizing = false end end)
     end
 end)
 UIS.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeStart
-        local newWidth = math.clamp(startSize.X.Offset + delta.X, 300, 800)
-        local newHeight = math.clamp(startSize.Y.Offset + delta.Y, 250, 600)
-        main.Size = UDim2.fromOffset(newWidth, newHeight)
+        main.Size = UDim2.fromOffset(math.clamp(startSize.X.Offset + delta.X, 300, 800), math.clamp(startSize.Y.Offset + delta.Y, 250, 600))
     end
 end)
 
