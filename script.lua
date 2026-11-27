@@ -16,7 +16,7 @@ local Themes = {
 local CurrentTheme = "Blue"
 local UI_Scale = 1
 local IsMinimized = false
-local CurrentTab = "Status" -- Default ke Status
+local CurrentTab = "Status"
 
 local C = {
     bg = Themes.Blue.bg, surface = Themes.Blue.surface, surfaceAlt = Color3.fromRGB(30, 38, 55),
@@ -213,106 +213,146 @@ for _, tName in ipairs(menuTabs) do
     tabButtons[tName] = btn
 end
 
--- STATUS TAB LOGIC
+-- ==========================================
+-- STATUS PAGE CUSTOM UI (ALa Maru)
+-- ==========================================
 local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.None
 statusGui.CanvasSize = UDim2.new(0,0,0,0)
 
-local function createStatusCard(titleText, yPos)
-    local card = Instance.new("Frame")
-    card.Size = UDim2.new(1, -10, 0, 45)
-    card.Position = UDim2.fromOffset(0, yPos)
-    card.BackgroundColor3 = C.surface
-    card.Parent = statusGui
+local greet = Instance.new("TextLabel")
+greet.Size = UDim2.new(1, -20, 0, 30)
+greet.Position = UDim2.fromOffset(10, 5)
+greet.BackgroundTransparency = 1
+greet.Text = "Status & Informasi"
+greet.TextColor3 = C.text
+greet.Font = Enum.Font.GothamBold
+greet.TextSize = 16
+greet.TextXAlignment = Enum.TextXAlignment.Left
+greet.Parent = statusGui
+
+local function createGridSection(title, yPos)
+    local titleLbl = Instance.new("TextLabel")
+    titleLbl.Size = UDim2.new(1, -20, 0, 15)
+    titleLbl.Position = UDim2.fromOffset(10, yPos)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Text = title
+    titleLbl.TextColor3 = C.textMuted
+    titleLbl.Font = Enum.Font.GothamBold
+    titleLbl.TextSize = 10
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    titleLbl.Parent = statusGui
+
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -20, 0, 80)
+    container.Position = UDim2.fromOffset(10, yPos + 20)
+    container.BackgroundTransparency = 1
+    container.Parent = statusGui
+
+    local grid = Instance.new("UIGridLayout")
+    grid.CellSize = UDim2.new(0, 185, 0, 50)
+    grid.CellPadding = UDim2.new(0, 10, 0, 10)
+    grid.Parent = container
+
+    return container
+end
+
+local function addStatBox(parent, titleText, initialVal)
+    local box = Instance.new("Frame")
+    box.BackgroundColor3 = C.surface
+    box.Parent = parent
     
     local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 8)
-    c.Parent = card
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = box
     
     local stroke = Instance.new("UIStroke")
     stroke.Color = C.border
-    stroke.Parent = card
-    
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -20, 1, 0)
-    lbl.Position = UDim2.fromOffset(15, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = titleText
-    lbl.TextColor3 = C.text
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextSize = 13
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = card
-    
-    local val = Instance.new("TextLabel")
-    val.Size = UDim2.new(1, -20, 1, 0)
-    val.Position = UDim2.fromOffset(15, 0)
-    val.BackgroundTransparency = 1
-    val.Text = "Loading..."
-    val.TextColor3 = C.accent
-    val.Font = Enum.Font.GothamBold
-    val.TextSize = 13
-    val.TextXAlignment = Enum.TextXAlignment.Right
-    val.Parent = card
-    
-    return val
+    stroke.Parent = box
+
+    local t = Instance.new("TextLabel")
+    t.Size = UDim2.new(1, -16, 0, 15)
+    t.Position = UDim2.fromOffset(8, 8)
+    t.BackgroundTransparency = 1
+    t.Text = titleText
+    t.TextColor3 = C.textMuted
+    t.Font = Enum.Font.Gotham
+    t.TextSize = 10
+    t.TextXAlignment = Enum.TextXAlignment.Left
+    t.Parent = box
+
+    local v = Instance.new("TextLabel")
+    v.Size = UDim2.new(1, -16, 0, 20)
+    v.Position = UDim2.fromOffset(8, 23)
+    v.BackgroundTransparency = 1
+    v.Text = initialVal
+    v.TextColor3 = C.text
+    v.Font = Enum.Font.GothamBold
+    v.TextSize = 12
+    v.TextXAlignment = Enum.TextXAlignment.Left
+    v.Parent = box
+
+    return v
 end
 
-local valUsername = createStatusCard("Player Name", 0)
-local valLevel = createStatusCard("Current Level", 55)
-local valPrehistoric = createStatusCard("Prehistoric Island", 110)
-local valMirage = createStatusCard("Mirage Island", 165)
-local valElite = createStatusCard("Elite Hunter", 220)
-local valServerId = createStatusCard("Server ID", 275)
+-- Account Section
+local accContainer = createGridSection("ACCOUNT INFO", 45)
+local valName = addStatBox(accContainer, "Name", LP.Name)
+local valLevel = addStatBox(accContainer, "Level", "Loading...")
+local valRace = addStatBox(accContainer, "Race", "Loading...")
+local valBeli = addStatBox(accContainer, "Beli", "Loading...")
+local valFrag = addStatBox(accContainer, "Fragment", "Loading...")
 
-valUsername.Text = LP.Name
-local function updateLevel()
-    local lvl = LP:FindFirstChild("Data") and LP.Data:FindFirstChild("Level")
-    valLevel.Text = lvl and tostring(lvl.Value) or "N/A"
-end
-updateLevel()
-if LP:FindFirstChild("Data") then
-    LP.Data.ChildAdded:Connect(function(c) if c.Name == "Level" then updateLevel() end end)
-end
-valServerId.Text = game.JobId ~= "" and string.sub(game.JobId, 1, 8).."..." or "Private"
+-- Server Section
+local srvContainer = createGridSection("SERVER INFO", 155)
+local valPlaceId = addStatBox(srvContainer, "Place ID", tostring(game.PlaceId))
+local valSession = addStatBox(srvContainer, "Session Time", "0s")
+local valServerAge = addStatBox(srvContainer, "Server Age", "0s")
+local valPrehistoric = addStatBox(srvContainer, "Prehistoric Island", "Checking...")
+local valMirage = addStatBox(srvContainer, "Mirage Island", "Checking...")
+local valElite = addStatBox(srvContainer, "Elite Hunter", "Checking...")
 
--- Cek Event Real-time
-local function checkEvents()
-    -- Prehistoric
-    if WS:FindFirstChild("Prehistoric Island") or WS:FindFirstChild("PrehistoricIsland") then
-        valPrehistoric.Text = "ACTIVE"
-        valPrehistoric.TextColor3 = Color3.fromRGB(50, 255, 50)
-    else
-        valPrehistoric.Text = "Not Found"
-        valPrehistoric.TextColor3 = C.textMuted
-    end
-    
-    -- Mirage
-    if WS:FindFirstChild("Mirage Island") or WS:FindFirstChild("MirageIsland") then
-        valMirage.Text = "ACTIVE"
-        valMirage.TextColor3 = Color3.fromRGB(50, 255, 50)
-    else
-        valMirage.Text = "Not Found"
-        valMirage.TextColor3 = C.textMuted
-    end
+-- Logic Update Data
+local startTime = tick()
 
-    -- Elite
-    if WS:FindFirstChild("Elite Hunter") or WS:FindFirstChild("EliteHunter") or WS:FindFirstChild("Elite") then
-        valElite.Text = "ACTIVE"
-        valElite.TextColor3 = Color3.fromRGB(50, 255, 50)
-    else
-        valElite.Text = "Not Found"
-        valElite.TextColor3 = C.textMuted
-    end
+local function formatTime(sec)
+    local m = math.floor(sec / 60)
+    local s = math.floor(sec % 60)
+    return tostring(m).."m "..tostring(s).."s"
 end
 
 task.spawn(function()
-    while task.wait(2) do
-        pcall(checkEvents)
+    while task.wait(1) do
+        pcall(function()
+            -- Account Stats
+            local data = LP:FindFirstChild("Data")
+            if data then
+                if data:FindFirstChild("Level") then valLevel.Text = tostring(data.Level.Value) end
+                if data:FindFirstChild("Race") then valRace.Text = tostring(data.Race.Value) end
+                if data:FindFirstChild("Beli") then valBeli.Text = tostring(data.Beli.Value) end
+                if data:FindFirstChild("Fragments") then valFrag.Text = tostring(data.Fragments.Value) end
+            end
+
+            -- Server Stats
+            valSession.Text = formatTime(tick() - startTime)
+            valServerAge.Text = formatTime(workspace.DistributedGameTime)
+
+            -- Events Detection (Simple check)
+            valPrehistoric.Text = (WS:FindFirstChild("Prehistoric Island") or WS:FindFirstChild("PrehistoricIsland")) and "ACTIVE" or "Not Found"
+            valPrehistoric.TextColor3 = valPrehistoric.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+            
+            valMirage.Text = (WS:FindFirstChild("Mirage Island") or WS:FindFirstChild("MirageIsland")) and "ACTIVE" or "Not Found"
+            valMirage.TextColor3 = valMirage.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+            
+            valElite.Text = (WS:FindFirstChild("Elite Hunter") or WS:FindFirstChild("EliteHunter")) and "ACTIVE" or "Not Found"
+            valElite.TextColor3 = valElite.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
+        end)
     end
 end)
 
--- COMPONENTS
+-- ==========================================
+-- COMPONENTS (Toggle & Settings)
+-- ==========================================
 local function createCard(parent, titleText, descText, toggleInitial, callback)
     local card = Instance.new("Frame")
     card.BackgroundColor3 = C.surface
@@ -365,7 +405,7 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
     
     local knob = Instance.new("Frame")
     knob.Size = UDim2.fromOffset(16, 16)
-    knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+    knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim.new(0, 2, 0.5, -8)
     knob.BackgroundColor3 = Color3.new(1,1,1)
     knob.Parent = toggle
     
@@ -542,7 +582,7 @@ minBtn.MouseButton1Click:Connect(function()
         }, Enum.EasingStyle.Back):Play()
         tabBar.Visible = false
         content.Visible = false
-        title.Text = "Kuro Island"
+        title.Text = "KuroHub"
         title.TextSize = 13
         minBtn.Text = "□"
     else
