@@ -91,6 +91,7 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
+-- Tombol Close dengan animasi ledakan/hilang
 local closeBtn = Instance.new("TextButton")
 closeBtn.AnchorPoint = Vector2.new(1, 0.5)
 closeBtn.Position = UDim2.new(1, -15, 0.5, 0)
@@ -107,10 +108,26 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = closeBtn
 
-closeBtn.MouseEnter:Connect(function() TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play() end)
-closeBtn.MouseLeave:Connect(function() TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = C.surfaceAlt}):Play() end)
-closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
+closeBtn.MouseButton1Click:Connect(function()
+    local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(0, 0),
+        BackgroundTransparency = 1
+    })
+    closeTween:Play()
+    TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
+    
+    for _, v in pairs(main:GetDescendants()) do
+        if v:IsA("TextLabel") or v:IsA("TextButton") then
+            TS:Create(v, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+        end
+    end
+    
+    closeTween.Completed:Connect(function()
+        gui:Destroy()
+    end)
+end)
 
+-- Tombol Minimize
 local minBtn = Instance.new("TextButton")
 minBtn.AnchorPoint = Vector2.new(1, 0.5)
 minBtn.Position = UDim2.new(1, -55, 0.5, 0)
@@ -126,13 +143,6 @@ minBtn.Parent = header
 local minCorner = Instance.new("UICorner")
 minCorner.CornerRadius = UDim.new(0, 8)
 minCorner.Parent = minBtn
-
-local isMinimized = false
-minBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    local target = isMinimized and UDim2.fromOffset(600, 50) or UDim2.fromOffset(600, 380)
-    TS:Create(main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = target}):Play()
-end)
 
 local tabBar = Instance.new("Frame")
 tabBar.Size = UDim2.new(1, -40, 0, 40)
@@ -217,6 +227,40 @@ makeTab("Status", "Status")
 
 firstTab.BackgroundColor3 = C.accent
 firstTab.TextColor3 = Color3.new(1,1,1)
+
+-- Logika Animasi Minimize Dynamic Landscape
+local isMinimized = false
+minBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    
+    if isMinimized then
+        -- Animasi mengecil dan melebar ke samping (Landscape dynamic)
+        TS:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(380, 50)
+        }):Play()
+        
+        tabBar.Visible = false
+        content.Visible = false
+        title.Text = "Kuro Hub (Minimized)"
+        title.TextColor3 = C.accent
+        title.TextSize = 14
+        
+        minBtn.Text = "□"
+    else
+        -- Animasi balik ke bentuk semula
+        TS:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.fromOffset(600, 380)
+        }):Play()
+        
+        tabBar.Visible = true
+        content.Visible = true
+        title.Text = "Kuro Hub | Blox Fruits"
+        title.TextColor3 = C.text
+        title.TextSize = 16
+        
+        minBtn.Text = "−"
+    end
+end)
 
 local function createCard(parent, titleText, descText, toggleInitial, callback)
     local card = Instance.new("Frame")
