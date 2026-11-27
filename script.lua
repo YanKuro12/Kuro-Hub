@@ -4,7 +4,6 @@ local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 
 local Themes = {
     Blue = {accent = Color3.fromRGB(0, 140, 255), surface = Color3.fromRGB(22, 28, 40), bg = Color3.fromRGB(15, 18, 26)},
@@ -19,6 +18,7 @@ local UI_Scale = 1
 local IsMinimized = false
 local CurrentTab = "Status"
 
+-- Benerin Variabel Warna
 local C = {
     bg = Themes.Blue.bg, 
     surface = Themes.Blue.surface, 
@@ -195,8 +195,6 @@ local function switchTab(name)
     for n, p in pairs(pages) do p.Visible = (n == name) end
     for tName, btn in pairs(tabButtons) do
         local isActive = (tName == name)
-        btn.BackgroundColor3 = isActive and C.accent or C.surface
-        btn.TextColor3 = isActive and Color3.new(1,1,1) or C.textMuted
         tween(btn, 0.15, {BackgroundColor3 = isActive and C.accent or C.surface}):Play()
         tween(btn, 0.15, {TextColor3 = isActive and Color3.new(1,1,1) or C.textMuted}):Play()
     end
@@ -222,7 +220,7 @@ for _, tName in ipairs(menuTabs) do
 end
 
 -- ==========================================
--- STATUS PAGE
+-- STATUS PAGE (BENERIN LAYOUT)
 -- ==========================================
 local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -264,10 +262,10 @@ subGreet.TextSize = 12
 subGreet.TextXAlignment = Enum.TextXAlignment.Left
 subGreet.Parent = profileContainer
 
--- 2 Box Besar
+-- 2 Box Besar (Fix Parent & Size)
 local boxContainer = Instance.new("Frame")
 boxContainer.Size = UDim2.new(1, 0, 0, 300)
-boxContainer.Position = UDim2.fromOffset(0, 70)
+boxContainer.Position = UDim2.fromOffset(0, 75)
 boxContainer.BackgroundTransparency = 1
 boxContainer.Parent = statusGui
 
@@ -455,7 +453,6 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
         if callback then callback(state) end
     end)
     
-    -- Efek Hover ala Modern UI
     card.MouseEnter:Connect(function() 
         tween(card, 0.15, {Size = UDim2.new(0, 285, 0, 88)}):Play() 
         tween(stroke, 0.15, {Color = C.accent}):Play()
@@ -467,7 +464,7 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
 end
 
 -- ==========================================
--- SETTINGS PANEL
+-- SETTINGS PANEL & HIDE
 -- ==========================================
 local settingsPanel = Instance.new("Frame")
 settingsPanel.Size = UDim2.new(1, -40, 1, -120)
@@ -548,7 +545,7 @@ hideBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ANIMASI DYNAMIC ISLAND & MINIMIZE
+-- DYNAMIC ISLAND ANIMATION (FIX)
 -- ==========================================
 minBtn.MouseButton1Click:Connect(function()
     if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end
@@ -570,7 +567,6 @@ minBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Klik Dimana Aja Pas Minimized Buat Balik
 main.InputBegan:Connect(function(input)
     if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
         IsMinimized = false
@@ -615,7 +611,6 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- DEFAULT CARDS
 createCard(pages["Main"], "Auto Farm Level", "Farms mobs to max level.", false, function(s) print("Auto Farm:", s) end)
 createCard(pages["Main"], "Auto Secret Quests", "Completes Secret Quests.", false, function(s) print("Secret:", s) end)
 createCard(pages["Farm Settings"], "Auto Buso", "Auto activates Buso.", false, function(s) print("Buso:", s) end)
