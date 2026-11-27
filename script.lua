@@ -220,5 +220,3 @@ task.spawn(function()
         end)
     end
 end)
-
--- Script ini nyambung ke main.lua (UI) lewat _G.KuroAutoFarm, _G.KuroAutoBuso, dll.
