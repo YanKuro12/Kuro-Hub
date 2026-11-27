@@ -4,7 +4,6 @@ local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 
 local Themes = {
     Blue = {accent = Color3.fromRGB(0, 200, 255), surface = Color3.fromRGB(18, 24, 38), bg = Color3.fromRGB(10, 14, 22)},
@@ -14,7 +13,6 @@ local Themes = {
     Yellow = {accent = Color3.fromRGB(255, 220, 50), surface = Color3.fromRGB(30, 26, 16), bg = Color3.fromRGB(16, 14, 8)}
 }
 
-local CurrentTheme = "Blue"
 local IsMinimized = false
 local CurrentTab = "Status"
 
@@ -72,7 +70,6 @@ main.Parent = gui
 
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = main
-
 local function updateScale()
     local vp = workspace.CurrentCamera.ViewportSize
     local sx = (vp.X * 0.9) / 500
@@ -82,36 +79,17 @@ end
 updateScale()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
+-- UI CORNER & STROKE (Fokus buat Dynamic Island)
 local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 12) mainCorner.Parent = main
 local mainStroke = Instance.new("UIStroke") mainStroke.Color = C.border mainStroke.Thickness = 1 mainStroke.Parent = main
 
--- DYNAMIC ISLAND EFFECTS (Glow & Shimmer)
-local islandGlow = Instance.new("UIStroke")
-islandGlow.Color = C.accent
-islandGlow.Thickness = 2
-islandGlow.Transparency = 1
-islandGlow.Parent = main
-
-local shimmer = Instance.new("Frame")
-shimmer.Size = UDim2.new(0, 50, 1, 0)
-shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
-shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
-shimmer.BackgroundTransparency = 1
-shimmer.BorderSizePixel = 0
-shimmer.Parent = main
-local shimGrad = Instance.new("UIGradient")
-shimGrad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-}
-shimGrad.Transparency = NumberSequence.new{
-    NumberSequenceKeypoint.new(0, 1),
-    NumberSequenceKeypoint.new(0.5, 0.8),
-    NumberSequenceKeypoint.new(1, 1)
-}
-shimGrad.Rotation = 20
-shimGrad.Parent = shimmer
+-- GRADIENT BIAR MEWAH PAS JADI ISLAND
+local mainGradient = Instance.new("UIGradient")
+mainGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, C.bg),
+    ColorSequenceKeypoint.new(1, C.bg)
+})
+mainGradient.Parent = main
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 45)
@@ -318,25 +296,50 @@ end
 local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, 0, 0, 30) hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) hideBtn.Text = "Sembunyikan Hub (Hide)" hideBtn.TextColor3 = Color3.new(1,1,1) hideBtn.Font = Enum.Font.GothamBold hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0,8) hc.Parent = hideBtn
 
--- ANIMASI DINAMIS (Dynamic Island)
-local isPulsing = false
-local pulseThread
+-- DYNAMIC ISLAND EFFECTS (GLOW & SHIMMER)
+local islandGlow = Instance.new("UIStroke")
+islandGlow.Color = C.accent
+islandGlow.Thickness = 2
+islandGlow.Transparency = 1
+islandGlow.Parent = main
 
+local shimmer = Instance.new("Frame")
+shimmer.Size = UDim2.new(0.5, 0, 1, 0)
+shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
+shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
+shimmer.BackgroundTransparency = 1
+shimmer.BorderSizePixel = 0
+shimmer.Parent = main
+local shimGrad = Instance.new("UIGradient")
+shimGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+shimGrad.Transparency = NumberSequence.new{
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.5, 0.9),
+    NumberSequenceKeypoint.new(1, 1)
+}
+shimGrad.Rotation = 15
+shimGrad.Parent = shimmer
+
+local isPulsing = false
 local function startIslandEffects()
     islandGlow.Transparency = 0.5
-    shimmer.BackgroundTransparency = 0.9
+    shimmer.BackgroundTransparency = 0.95
     if isPulsing then return end
     isPulsing = true
     
-    -- Animasi Glow Berdenyut
+    -- Animasi Glow Berdenyut & Shimmer Jalan
     task.spawn(function()
         while isPulsing do
-            tween(islandGlow, 1, {Transparency = 0.1, Thickness = 4}, Enum.EasingStyle.Sine):Play()
-            tween(shimmer, 1, {Position = UDim2.new(1.5, 0, 0, 0)}):Play()
-            task.wait(1)
-            tween(islandGlow, 1, {Transparency = 0.5, Thickness = 1}, Enum.EasingStyle.Sine):Play()
+            tween(islandGlow, 1.5, {Transparency = 0.1, Thickness = 5}, Enum.EasingStyle.Sine):Play()
+            tween(shimmer, 1.5, {Position = UDim2.new(1.5, 0, 0, 0)}):Play()
+            task.wait(1.5)
+            tween(islandGlow, 1.5, {Transparency = 0.6, Thickness = 1}, Enum.EasingStyle.Sine):Play()
             shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
-            task.wait(1)
+            task.wait(1.5)
         end
     end)
 end
@@ -348,10 +351,21 @@ local function stopIslandEffects()
     shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
 end
 
--- BUTTON EVENTS
+-- BUTTON EVENTS (DYNAMIC ISLAND LOGIC FIX)
 local function minimizeToIsland()
     IsMinimized = true
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
+    -- Efek: Mengecil ke atas, sudut jadi kapsul (1,0), warna lebih gelap
+    tween(main, 0.4, {
+        AnchorPoint = Vector2.new(0.5, 0),
+        Position = UDim2.new(0.5, 0, 0, 15),
+        Size = UDim2.fromOffset(280, 40),
+        BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    }, Enum.EasingStyle.Back):Play()
+    
+    -- Ubah sudut jadi kapsul sempurna
+    tween(mainCorner, 0.4, {CornerRadius = UDim.new(1, 0)}):Play()
+    mainStroke.Transparency = 1 -- Matikan garis luar
+    
     tabBar.Visible = false
     content.Visible = false
     title.Text = "Kuro Island"
@@ -362,7 +376,17 @@ end
 
 local function restoreFromIsland()
     IsMinimized = false
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(500, 380),
+        BackgroundColor3 = C.bg
+    }, Enum.EasingStyle.Back):Play()
+    
+    -- Balikin sudut kotak ke normal
+    tween(mainCorner, 0.4, {CornerRadius = UDim.new(0, 12)}):Play()
+    mainStroke.Transparency = 0
+    
     tabBar.Visible = true
     content.Visible = true
     title.Text = "Kuro Hub | Blox Fruits"
