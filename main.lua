@@ -6,7 +6,20 @@ local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
 
 -- ==========================================
--- TEMA & KONFIGURASI WARNA
+-- GLOBAL VARIABLES (NANTI DIBACA SAMA script.lua)
+-- ==========================================
+_G.KuroAutoFarm = false
+_G.KuroAutoSecret = false
+_G.KuroAutoBuso = false
+_G.KuroAutoKen = false
+_G.KuroRaidBuyChip = false
+_G.KuroRaidFarm = false
+_G.KuroRaidKill = false
+_G.KuroRaidStart = false
+_G.KuroRaidAwake = false
+
+-- ==========================================
+-- TEMA & KONFIGURASI
 -- ==========================================
 local Themes = {
     Blue = {accent = Color3.fromRGB(0, 200, 255), surface = Color3.fromRGB(18, 24, 38), bg = Color3.fromRGB(10, 14, 22)},
@@ -30,7 +43,7 @@ local function tween(obj, time, props, style)
 end
 
 -- ==========================================
--- KOMPONEN UI (MODULAR)
+-- KOMPONEN UI
 -- ==========================================
 local function createSection(parent, titleText, descText)
     local section = Instance.new("Frame")
@@ -69,7 +82,7 @@ local function createToggle(parent, titleText, descText, toggleInitial, callback
     local stroke = Instance.new("UIStroke") stroke.Color = C.border stroke.Parent = card
     
     local t = Instance.new("TextLabel") t.Size = UDim2.new(1, -60, 0, 18) t.Position = UDim2.fromOffset(12, 8) t.BackgroundTransparency = 1 t.Text = titleText t.TextColor3 = C.text t.Font = Enum.Font.GothamBold t.TextSize = 11 t.TextXAlignment = Enum.TextXAlignment.Left t.Parent = card
-    local d = Instance.new("TextLabel") d.Size = UDim2.new(1, -60, 0, 14) d.Position = UDim2.fromOffset(12, 26) d.BackgroundTransparency = 1 d.Text = descText d.TextColor3 = C.textMuted d.Font = Enum.Font.Gotham d.TextSize = 9 d.TextXAlignment = Enum.TextXAlignment.Left t.Parent = card
+    local d = Instance.new("TextLabel") d.Size = UDim2.new(1, -60, 0, 14) d.Position = UDim2.fromOffset(12, 26) d.BackgroundTransparency = 1 d.Text = descText d.TextColor3 = C.textMuted d.Font = Enum.Font.Gotham d.TextSize = 9 d.TextXAlignment = Enum.TextXAlignment.Left d.Parent = card
     
     local toggle = Instance.new("TextButton") toggle.AnchorPoint = Vector2.new(1, 0.5) toggle.Position = UDim2.new(1, -12, 0.5, 0) toggle.Size = UDim2.fromOffset(36, 20) toggle.BackgroundColor3 = toggleInitial and C.accent or C.surfaceAlt toggle.AutoButtonColor = false toggle.Text = "" toggle.Parent = card
     local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(1, 0) tc.Parent = toggle
@@ -255,7 +268,7 @@ for _, tName in ipairs(menuTabs) do
 end
 
 -- ==========================================
--- ISI TAB STATUS (PROFILE & SERVER INFO)
+-- ISI TAB STATUS
 -- ==========================================
 local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -326,32 +339,48 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- ISI TAB RAID (NORMAL & LAW)
+-- ISI TAB MAIN (SYSTEM AUTOFARM)
+-- ==========================================
+local mainPage = pages["Main"]
+createSection(mainPage, "AUTO FARM", "Konfigurasi farming level & secret.")
+createToggle(mainPage, "Auto Farm Level", "Farms mobs to max level.", false, function(s) 
+    _G.KuroAutoFarm = s
+    print("System: Auto Farm", s and "ON" or "OFF")
+end)
+createToggle(mainPage, "Auto Secret Quests", "Completes Secret Quests.", false, function(s) 
+    _G.KuroAutoSecret = s
+    print("System: Auto Secret", s and "ON" or "OFF")
+end)
+
+-- ==========================================
+-- ISI TAB RAID
 -- ==========================================
 local raidPage = pages["RAID"]
 raidPage.ScrollBarThickness = 2
 
 createSection(raidPage, "NORMAL RAID", "Fitur untuk semua jenis raid (kecuali Law).")
-createDropdown(raidPage, "Choice Raid", {"Flame", "Ice", "Dark", "Sand", "Quake", "Buddha", "Spider", "Dough", "Phoenix"}, function(val) print("Raid dipilih:", val) end)
-createToggle(raidPage, "Auto Buy Chip", "Beli chip raid otomatis.", false, function(s) print("Buy Chip:", s) end)
-createToggle(raidPage, "Auto Farm Raid", "Kill NPC & pindah island.", false, function(s) print("Farm Raid:", s) end)
-createToggle(raidPage, "Instant Kill NPC", "Bunuh bos secara instan.", false, function(s) print("Insta Kill:", s) end)
-createToggle(raidPage, "Auto Start Raid", "Mulai raid otomatis.", false, function(s) print("Start Raid:", s) end)
-createToggle(raidPage, "Auto Awakening", "Buka awakening fruit otomatis.", false, function(s) print("Awakening:", s) end)
+createDropdown(raidPage, "Choice Raid", {"Flame", "Ice", "Dark", "Sand", "Quake", "Buddha", "Spider", "Dough", "Phoenix"}, function(val) 
+    _G.KuroRaidChoice = val
+end)
+createToggle(raidPage, "Auto Buy Chip", "Beli chip raid otomatis.", false, function(s) _G.KuroRaidBuyChip = s end)
+createToggle(raidPage, "Auto Farm Raid", "Kill NPC & pindah island.", false, function(s) _G.KuroRaidFarm = s end)
+createToggle(raidPage, "Instant Kill NPC", "Bunuh bos secara instan.", false, function(s) _G.KuroRaidKill = s end)
+createToggle(raidPage, "Auto Start Raid", "Mulai raid otomatis.", false, function(s) _G.KuroRaidStart = s end)
+createToggle(raidPage, "Auto Awakening", "Buka awakening fruit otomatis.", false, function(s) _G.KuroRaidAwake = s end)
 
 local spacer = Instance.new("Frame") spacer.Size = UDim2.new(1, -10, 0, 20) spacer.BackgroundTransparency = 1 spacer.Parent = raidPage
 
 createSection(raidPage, "RAID LAW", "Fitur khusus farming Law secara otomatis.")
-createToggle(raidPage, "Buy Chip Law Raid", "Beli chip raid Law otomatis.", false, function(s) print("Law Chip:", s) end)
-createToggle(raidPage, "Auto Farm Law Boss", "Kill boss Law secara otomatis.", false, function(s) print("Law Boss:", s) end)
+createToggle(raidPage, "Buy Chip Law Raid", "Beli chip raid Law otomatis.", false, function(s) _G.KuroRaidLawChip = s end)
+createToggle(raidPage, "Auto Farm Law Boss", "Kill boss Law secara otomatis.", false, function(s) _G.KuroRaidLawBoss = s end)
 
 -- ==========================================
--- ISI TAB MAIN & FARM SETTINGS (SEMENTARA)
+-- ISI TAB FARM SETTINGS
 -- ==========================================
-createToggle(pages["Main"], "Auto Farm Level", "Farms mobs to max level.", false, function(s) print("Auto Farm:", s) end)
-createToggle(pages["Main"], "Auto Secret Quests", "Completes Secret Quests.", false, function(s) print("Secret:", s) end)
-createToggle(pages["Farm Settings"], "Auto Buso", "Auto activates Buso.", false, function(s) print("Buso:", s) end)
-createToggle(pages["Farm Settings"], "Auto Ken", "Auto activates Ken.", false, function(s) print("Ken:", s) end)
+local fsPage = pages["Farm Settings"]
+createSection(fsPage, "BUFF SYSTEM", "Nyalain buff secara otomatis saat farm.")
+createToggle(fsPage, "Auto Buso", "Auto activates Buso (Armament).", false, function(s) _G.KuroAutoBuso = s end)
+createToggle(fsPage, "Auto Ken", "Auto activates Ken (Observation).", false, function(s) _G.KuroAutoKen = s end)
 
 -- ==========================================
 -- SETTINGS PANEL (GANTI TEMA DLL)
@@ -390,41 +419,16 @@ local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, 0, 0, 30)
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0,8) hc.Parent = hideBtn
 
 -- ==========================================
--- DYNAMIC ISLAND EFFECTS (GLOW & SHIMMER)
+-- DYNAMIC ISLAND EFFECTS
 -- ==========================================
-local islandGlow = Instance.new("UIStroke")
-islandGlow.Color = C.accent
-islandGlow.Thickness = 2
-islandGlow.Transparency = 1
-islandGlow.Parent = main
-
-local shimmer = Instance.new("Frame")
-shimmer.Size = UDim2.new(0.5, 0, 1, 0)
-shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
-shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
-shimmer.BackgroundTransparency = 1
-shimmer.BorderSizePixel = 0
-shimmer.Parent = main
-local shimGrad = Instance.new("UIGradient")
-shimGrad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-}
-shimGrad.Transparency = NumberSequence.new{
-    NumberSequenceKeypoint.new(0, 1),
-    NumberSequenceKeypoint.new(0.5, 0.9),
-    NumberSequenceKeypoint.new(1, 1)
-}
-shimGrad.Rotation = 15
-shimGrad.Parent = shimmer
+local islandGlow = Instance.new("UIStroke") islandGlow.Color = C.accent islandGlow.Thickness = 2 islandGlow.Transparency = 1 islandGlow.Parent = main
+local shimmer = Instance.new("Frame") shimmer.Size = UDim2.new(0.5, 0, 1, 0) shimmer.Position = UDim2.new(-0.5, 0, 0, 0) shimmer.BackgroundColor3 = Color3.new(1, 1, 1) shimmer.BackgroundTransparency = 1 shimmer.BorderSizePixel = 0 shimmer.Parent = main
+local shimGrad = Instance.new("UIGradient") shimGrad.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))} shimGrad.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0, 1),NumberSequenceKeypoint.new(0.5, 0.9),NumberSequenceKeypoint.new(1, 1)} shimGrad.Rotation = 15 shimGrad.Parent = shimmer
 
 local isPulsing = false
 local function startIslandEffects()
-    islandGlow.Transparency = 0.5
-    shimmer.BackgroundTransparency = 0.95
-    if isPulsing then return end
-    isPulsing = true
+    islandGlow.Transparency = 0.5; shimmer.BackgroundTransparency = 0.95
+    if isPulsing then return end; isPulsing = true
     task.spawn(function()
         while isPulsing do
             tween(islandGlow, 1.5, {Transparency = 0.1, Thickness = 5}, Enum.EasingStyle.Sine):Play()
@@ -438,10 +442,7 @@ local function startIslandEffects()
 end
 
 local function stopIslandEffects()
-    isPulsing = false
-    islandGlow.Transparency = 1
-    shimmer.BackgroundTransparency = 1
-    shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
+    isPulsing = false; islandGlow.Transparency = 1; shimmer.BackgroundTransparency = 1; shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
 end
 
 -- ==========================================
@@ -451,12 +452,7 @@ local function minimizeToIsland()
     IsMinimized = true
     tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundColor3 = Color3.fromRGB(15, 15, 20)}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(1, 0)}):Play()
-    mainStroke.Transparency = 1
-    tabBar.Visible = false
-    content.Visible = false
-    title.Text = "Kuro Island"
-    title.TextSize = 13
-    minBtn.Text = "□"
+    mainStroke.Transparency = 1; tabBar.Visible = false; content.Visible = false; title.Text = "Kuro Island"; title.TextSize = 13; minBtn.Text = "□"
     startIslandEffects()
 end
 
@@ -464,87 +460,26 @@ local function restoreFromIsland()
     IsMinimized = false
     tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(0, 12)}):Play()
-    mainStroke.Transparency = 0
-    tabBar.Visible = true
-    content.Visible = true
-    title.Text = "Kuro Hub | Blox Fruits"
-    title.TextSize = 14
-    minBtn.Text = "−"
+    mainStroke.Transparency = 0; tabBar.Visible = true; content.Visible = true; title.Text = "Kuro Hub | Blox Fruits"; title.TextSize = 14; minBtn.Text = "−"
     stopIslandEffects()
 end
 
-hideBtn.MouseButton1Click:Connect(function()
-    settingsPanel.Visible = false
-    minimizeToIsland()
-end)
+hideBtn.MouseButton1Click:Connect(function() settingsPanel.Visible = false; minimizeToIsland() end)
+minBtn.MouseButton1Click:Connect(function() if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end; if IsMinimized then restoreFromIsland() else minimizeToIsland() end end)
+main.InputBegan:Connect(function(input) if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then restoreFromIsland() end end)
+setBtn.MouseButton1Click:Connect(function() if IsMinimized then return end; settingsPanel.Visible = not settingsPanel.Visible; content.Visible = not settingsPanel.Visible; tabBar.Visible = not settingsPanel.Visible end)
+closeBtn.MouseButton1Click:Connect(function() local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1}); closeTween:Play(); TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play(); closeTween.Completed:Connect(function() gui:Destroy() end) end)
 
-minBtn.MouseButton1Click:Connect(function()
-    if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end
-    if IsMinimized then restoreFromIsland() else minimizeToIsland() end
-end)
+-- DRAG & RESIZE
+local dragging = false; local dragInput, dragStart, startPos
+header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = main.Position; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
+header.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+UIS.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart; main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
-main.InputBegan:Connect(function(input)
-    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-        restoreFromIsland()
-    end
-end)
-
-setBtn.MouseButton1Click:Connect(function()
-    if IsMinimized then return end
-    settingsPanel.Visible = not settingsPanel.Visible
-    content.Visible = not settingsPanel.Visible
-    tabBar.Visible = not settingsPanel.Visible
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-    local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1})
-    closeTween:Play()
-    TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
-    closeTween.Completed:Connect(function() gui:Destroy() end)
-end)
-
--- ==========================================
--- DRAG & RESIZE WINDOW
--- ==========================================
-local dragging = false
-local dragInput, dragStart, startPos
-header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true; dragStart = input.Position; startPos = main.Position
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
-    end
-end)
-header.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-local resizeBtn = Instance.new("TextButton")
-resizeBtn.Size = UDim2.fromOffset(15, 15)
-resizeBtn.Position = UDim2.new(1, -15, 1, -15)
-resizeBtn.BackgroundColor3 = C.accent
-resizeBtn.Text = ""
-resizeBtn.Parent = main
+local resizeBtn = Instance.new("TextButton"); resizeBtn.Size = UDim2.fromOffset(15, 15); resizeBtn.Position = UDim2.new(1, -15, 1, -15); resizeBtn.BackgroundColor3 = C.accent; resizeBtn.Text = ""; resizeBtn.Parent = main
 local rc = Instance.new("UICorner") rc.CornerRadius = UDim.new(0, 4) rc.Parent = resizeBtn
-
-local resizing = false
-local resizeStart, startSize
-resizeBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = true; resizeStart = input.Position; startSize = main.Size
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then resizing = false end end)
-    end
-end)
-UIS.InputChanged:Connect(function(input)
-    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - resizeStart
-        main.Size = UDim2.fromOffset(math.clamp(startSize.X.Offset + delta.X, 300, 800), math.clamp(startSize.Y.Offset + delta.Y, 250, 600))
-    end
-end)
+local resizing = false; local resizeStart, startSize
+resizeBtn.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then resizing = true; resizeStart = input.Position; startSize = main.Size; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then resizing = false end end) end end)
+UIS.InputChanged:Connect(function(input) if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then local delta = input.Position - resizeStart; main.Size = UDim2.fromOffset(math.clamp(startSize.X.Offset + delta.X, 300, 800), math.clamp(startSize.Y.Offset + delta.Y, 250, 600)) end end)
 
 switchTab("Status")
