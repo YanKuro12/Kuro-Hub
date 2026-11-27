@@ -4,6 +4,7 @@ local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
 local Themes = {
     Blue = {accent = Color3.fromRGB(0, 140, 255), surface = Color3.fromRGB(22, 28, 40), bg = Color3.fromRGB(15, 18, 26)},
@@ -19,9 +20,13 @@ local IsMinimized = false
 local CurrentTab = "Status"
 
 local C = {
-    bg = Themes.Blue.bg, surface = Themes.Blue.surface, surfaceAlt = Color3.fromRGB(30, 38, 55),
-    border = Color3.fromRGB(45, 55, 75), accent = Themes.Blue.accent,
-    text = Color3.fromRGB(255, 255, 255), textMuted = Color3.fromRGB(140, 150, 170),
+    bg = Themes.Blue.bg, 
+    surface = Themes.Blue.surface, 
+    surfaceAlt = Color3.fromRGB(30, 38, 55),
+    border = Color3.fromRGB(45, 55, 75), 
+    accent = Themes.Blue.accent,
+    text = Color3.fromRGB(255, 255, 255), 
+    textMuted = Color3.fromRGB(140, 150, 170),
 }
 
 local function tween(obj, time, props, style)
@@ -126,8 +131,8 @@ local function createHeaderBtn(icon, order)
     c.CornerRadius = UDim.new(0, 8)
     c.Parent = btn
     
-    btn.MouseEnter:Connect(function() tween(btn, 0.1, {BackgroundColor3 = C.accent}):Play() end)
-    btn.MouseLeave:Connect(function() tween(btn, 0.1, {BackgroundColor3 = C.surfaceAlt}):Play() end)
+    btn.MouseEnter:Connect(function() tween(btn, 0.15, {BackgroundColor3 = C.accent}):Play() end)
+    btn.MouseLeave:Connect(function() tween(btn, 0.15, {BackgroundColor3 = C.surfaceAlt}):Play() end)
     return btn
 end
 
@@ -189,8 +194,11 @@ local function switchTab(name)
     CurrentTab = name
     for n, p in pairs(pages) do p.Visible = (n == name) end
     for tName, btn in pairs(tabButtons) do
-        btn.BackgroundColor3 = (tName == name) and C.accent or C.surface
-        btn.TextColor3 = (tName == name) and Color3.new(1,1,1) or C.textMuted
+        local isActive = (tName == name)
+        btn.BackgroundColor3 = isActive and C.accent or C.surface
+        btn.TextColor3 = isActive and Color3.new(1,1,1) or C.textMuted
+        tween(btn, 0.15, {BackgroundColor3 = isActive and C.accent or C.surface}):Play()
+        tween(btn, 0.15, {TextColor3 = isActive and Color3.new(1,1,1) or C.textMuted}):Play()
     end
 end
 
@@ -214,13 +222,13 @@ for _, tName in ipairs(menuTabs) do
 end
 
 -- ==========================================
--- STATUS PAGE (REVISI 2 BOX BESAR + PROFILE)
+-- STATUS PAGE
 -- ==========================================
 local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
 statusGui.ScrollBarThickness = 0
 
--- Profile Section (Kiri Atas)
+-- Profile Section
 local profileContainer = Instance.new("Frame")
 profileContainer.Size = UDim2.new(1, 0, 0, 60)
 profileContainer.Position = UDim2.fromOffset(0, 0)
@@ -256,7 +264,7 @@ subGreet.TextSize = 12
 subGreet.TextXAlignment = Enum.TextXAlignment.Left
 subGreet.Parent = profileContainer
 
--- Container untuk 2 Box Besar
+-- 2 Box Besar
 local boxContainer = Instance.new("Frame")
 boxContainer.Size = UDim2.new(1, 0, 0, 300)
 boxContainer.Position = UDim2.fromOffset(0, 70)
@@ -267,7 +275,6 @@ local boxLayout = Instance.new("UIListLayout")
 boxLayout.Padding = UDim.new(0, 10)
 boxLayout.Parent = boxContainer
 
--- Fungsi buat bikin Box Besar
 local function createBigBox(titleText)
     local box = Instance.new("Frame")
     box.Size = UDim2.new(1, -10, 0, 130)
@@ -334,14 +341,12 @@ local function addSmallStat(parent, titleText, initialVal)
     return v
 end
 
--- Box 1: Account Info
 local accGrid = createBigBox("ACCOUNT STATS")
 local valLevel = addSmallStat(accGrid, "Level", "Loading...")
 local valRace = addSmallStat(accGrid, "Race", "Loading...")
 local valBeli = addSmallStat(accGrid, "Beli", "Loading...")
 local valFrag = addSmallStat(accGrid, "Fragment", "Loading...")
 
--- Box 2: Server Info
 local srvGrid = createBigBox("SERVER STATS")
 local valPlaceId = addSmallStat(srvGrid, "Place ID", tostring(game.PlaceId))
 local valSession = addSmallStat(srvGrid, "Session", "0s")
@@ -350,14 +355,8 @@ local valPrehistoric = addSmallStat(srvGrid, "Prehistoric", "Not Found")
 local valMirage = addSmallStat(srvGrid, "Mirage", "Not Found")
 local valElite = addSmallStat(srvGrid, "Elite Hunter", "Not Found")
 
--- Logic Update Data
 local startTime = tick()
-
-local function formatTime(sec)
-    local m = math.floor(sec / 60)
-    local s = math.floor(sec % 60)
-    return tostring(m).."m "..tostring(s).."s"
-end
+local function formatTime(sec) return tostring(math.floor(sec / 60)).."m "..tostring(math.floor(sec % 60)).."s" end
 
 task.spawn(function()
     while task.wait(1) do
@@ -385,7 +384,9 @@ task.spawn(function()
     end
 end)
 
+-- ==========================================
 -- COMPONENTS
+-- ==========================================
 local function createCard(parent, titleText, descText, toggleInitial, callback)
     local card = Instance.new("Frame")
     card.BackgroundColor3 = C.surface
@@ -454,11 +455,20 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
         if callback then callback(state) end
     end)
     
-    card.MouseEnter:Connect(function() tween(card, 0.1, {BackgroundColor3 = C.surfaceAlt}):Play() end)
-    card.MouseLeave:Connect(function() tween(card, 0.1, {BackgroundColor3 = C.surface}):Play() end)
+    -- Efek Hover ala Modern UI
+    card.MouseEnter:Connect(function() 
+        tween(card, 0.15, {Size = UDim2.new(0, 285, 0, 88)}):Play() 
+        tween(stroke, 0.15, {Color = C.accent}):Play()
+    end)
+    card.MouseLeave:Connect(function() 
+        tween(card, 0.15, {Size = UDim2.new(0, 280, 0, 85)}):Play() 
+        tween(stroke, 0.15, {Color = C.border}):Play()
+    end)
 end
 
--- SETTINGS PANEL (Sederhana biar ga kepanjangan)
+-- ==========================================
+-- SETTINGS PANEL
+-- ==========================================
 local settingsPanel = Instance.new("Frame")
 settingsPanel.Size = UDim2.new(1, -40, 1, -120)
 settingsPanel.Position = UDim2.fromOffset(20, 105)
@@ -518,7 +528,6 @@ for i, tName in ipairs({"Blue", "Purple", "Green", "Red", "Yellow"}) do
     end)
 end
 
--- Hide Button
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(1, -20, 0, 30)
 hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
@@ -538,7 +547,9 @@ hideBtn.MouseButton1Click:Connect(function()
     minBtn.Text = "□"
 end)
 
--- MINIMIZE
+-- ==========================================
+-- ANIMASI DYNAMIC ISLAND & MINIMIZE
+-- ==========================================
 minBtn.MouseButton1Click:Connect(function()
     if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end
     IsMinimized = not IsMinimized
@@ -546,7 +557,7 @@ minBtn.MouseButton1Click:Connect(function()
         tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
         tabBar.Visible = false
         content.Visible = false
-        title.Text = "KuroHub"
+        title.Text = "Kuro Island"
         title.TextSize = 13
         minBtn.Text = "□"
     else
@@ -559,5 +570,55 @@ minBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Klik Dimana Aja Pas Minimized Buat Balik
 main.InputBegan:Connect(function(input)
-    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == 
+    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        IsMinimized = false
+        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(650, 420), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
+        tabBar.Visible = true
+        content.Visible = true
+        title.Text = "Kuro Hub | Blox Fruits"
+        title.TextSize = 15
+        minBtn.Text = "−"
+    end
+end)
+
+setBtn.MouseButton1Click:Connect(function()
+    if IsMinimized then return end
+    settingsPanel.Visible = not settingsPanel.Visible
+    content.Visible = not settingsPanel.Visible
+    tabBar.Visible = not settingsPanel.Visible
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1})
+    closeTween:Play()
+    TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
+    closeTween.Completed:Connect(function() gui:Destroy() end)
+end)
+
+local dragging = false
+local dragInput, dragStart, startPos
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = main.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+    end
+end)
+header.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- DEFAULT CARDS
+createCard(pages["Main"], "Auto Farm Level", "Farms mobs to max level.", false, function(s) print("Auto Farm:", s) end)
+createCard(pages["Main"], "Auto Secret Quests", "Completes Secret Quests.", false, function(s) print("Secret:", s) end)
+createCard(pages["Farm Settings"], "Auto Buso", "Auto activates Buso.", false, function(s) print("Buso:", s) end)
+createCard(pages["Farm Settings"], "Auto Ken", "Auto activates Ken.", false, function(s) print("Ken:", s) end)
+
+switchTab("Status")
