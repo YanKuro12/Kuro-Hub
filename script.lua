@@ -4,6 +4,7 @@ local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
 local Themes = {
     Blue = {accent = Color3.fromRGB(0, 200, 255), surface = Color3.fromRGB(18, 24, 38), bg = Color3.fromRGB(10, 14, 22)},
@@ -32,21 +33,14 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
     card.Size = UDim2.new(1, -10, 0, 85)
     card.BackgroundColor3 = C.surface
     card.Parent = parent
-    
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 8) c.Parent = card
-    
     local stroke = Instance.new("UIStroke") stroke.Color = C.border stroke.Thickness = 1 stroke.Parent = card
-    
     local t = Instance.new("TextLabel") t.Size = UDim2.new(1, -60, 0, 20) t.Position = UDim2.fromOffset(12, 10) t.BackgroundTransparency = 1 t.Text = titleText t.TextColor3 = C.text t.Font = Enum.Font.GothamBold t.TextSize = 12 t.TextXAlignment = Enum.TextXAlignment.Left t.Parent = card
-    
     local d = Instance.new("TextLabel") d.Size = UDim2.new(1, -60, 0, 30) d.Position = UDim2.fromOffset(12, 30) d.BackgroundTransparency = 1 d.Text = descText d.TextColor3 = C.textMuted d.Font = Enum.Font.Gotham d.TextSize = 10 d.TextWrapped = true d.TextXAlignment = Enum.TextXAlignment.Left d.TextYAlignment = Enum.TextYAlignment.Top d.Parent = card
-    
     local toggle = Instance.new("TextButton") toggle.AnchorPoint = Vector2.new(1, 0.5) toggle.Position = UDim2.new(1, -12, 0.5, 0) toggle.Size = UDim2.fromOffset(36, 20) toggle.BackgroundColor3 = toggleInitial and C.accent or C.surfaceAlt toggle.AutoButtonColor = false toggle.Text = "" toggle.Parent = card
-    
     local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(1, 0) tc.Parent = toggle
     local knob = Instance.new("Frame") knob.Size = UDim2.fromOffset(16, 16) knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8) knob.BackgroundColor3 = Color3.new(1,1,1) knob.Parent = toggle
     local kc = Instance.new("UICorner") kc.CornerRadius = UDim.new(1, 0) kc.Parent = knob
-    
     local state = toggleInitial
     toggle.MouseButton1Click:Connect(function()
         state = not state
@@ -54,7 +48,6 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
         tween(toggle, 0.15, {BackgroundColor3 = state and C.accent or C.surfaceAlt}):Play()
         if callback then callback(state) end
     end)
-    
     card.MouseEnter:Connect(function() tween(stroke, 0.2, {Color = C.accent, Thickness = 2}):Play() tween(card, 0.2, {BackgroundColor3 = C.surfaceAlt}):Play() end)
     card.MouseLeave:Connect(function() tween(stroke, 0.2, {Color = C.border, Thickness = 1}):Play() tween(card, 0.2, {BackgroundColor3 = C.surface}):Play() end)
 end
@@ -92,6 +85,34 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateS
 local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 12) mainCorner.Parent = main
 local mainStroke = Instance.new("UIStroke") mainStroke.Color = C.border mainStroke.Thickness = 1 mainStroke.Parent = main
 
+-- DYNAMIC ISLAND EFFECTS (Glow & Shimmer)
+local islandGlow = Instance.new("UIStroke")
+islandGlow.Color = C.accent
+islandGlow.Thickness = 2
+islandGlow.Transparency = 1
+islandGlow.Parent = main
+
+local shimmer = Instance.new("Frame")
+shimmer.Size = UDim2.new(0, 50, 1, 0)
+shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
+shimmer.BackgroundColor3 = Color3.new(1, 1, 1)
+shimmer.BackgroundTransparency = 1
+shimmer.BorderSizePixel = 0
+shimmer.Parent = main
+local shimGrad = Instance.new("UIGradient")
+shimGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+shimGrad.Transparency = NumberSequence.new{
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.5, 0.8),
+    NumberSequenceKeypoint.new(1, 1)
+}
+shimGrad.Rotation = 20
+shimGrad.Parent = shimmer
+
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 45)
 header.BackgroundColor3 = C.surface
@@ -100,7 +121,7 @@ local headerCorner = Instance.new("UICorner") headerCorner.CornerRadius = UDim.n
 local headerFix = Instance.new("Frame") headerFix.Size = UDim2.new(1, 0, 0, 10) headerFix.Position = UDim2.new(0, 0, 1, -10) headerFix.BackgroundColor3 = C.surface headerFix.BorderSizePixel = 0 headerFix.Parent = header
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -130, 1, 0) -- Kasih ruang lebih buat tombol
+title.Size = UDim2.new(1, -130, 1, 0)
 title.Position = UDim2.fromOffset(15, 0)
 title.BackgroundTransparency = 1
 title.Text = "Kuro Hub | Blox Fruits"
@@ -131,7 +152,6 @@ local function createHeaderBtn(icon, order, hoverColor)
     btn.Parent = btnContainer
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
     local stroke = Instance.new("UIStroke") stroke.Color = Color3.new(0,0,0) stroke.Transparency = 1 stroke.Parent = btn
-    
     btn.MouseEnter:Connect(function() tween(btn, 0.1, {BackgroundColor3 = hoverColor}):Play() tween(stroke, 0.1, {Transparency = 0, Color = hoverColor}):Play() end)
     btn.MouseLeave:Connect(function() tween(btn, 0.1, {BackgroundColor3 = C.surfaceAlt}):Play() tween(stroke, 0.1, {Transparency = 1}):Play() end)
     return btn
@@ -259,7 +279,6 @@ task.spawn(function()
             end
             valSession.Text = formatTime(tick() - startTime)
             valServerAge.Text = formatTime(workspace.DistributedGameTime)
-            
             valPrehistoric.Text = (WS:FindFirstChild("Prehistoric Island") or WS:FindFirstChild("PrehistoricIsland")) and "ACTIVE" or "Not Found"
             valPrehistoric.TextColor3 = valPrehistoric.Text == "ACTIVE" and C.accent or C.text
             valMirage.Text = (WS:FindFirstChild("Mirage Island") or WS:FindFirstChild("MirageIsland")) and "ACTIVE" or "Not Found"
@@ -288,44 +307,83 @@ for i, tName in ipairs({"Blue", "Purple", "Green", "Red", "Yellow"}) do
         C.accent = Themes[tName].accent; C.surface = Themes[tName].surface; C.bg = Themes[tName].bg
         main.BackgroundColor3 = C.bg; header.BackgroundColor3 = C.surface; headerFix.BackgroundColor3 = C.surface
         mainStroke.Color = C.border
-        -- FIX UTAMA: Update teks tab biar ga ilang
         for tName, t in pairs(tabButtons) do
             t.BackgroundColor3 = (tName == CurrentTab) and C.accent or C.surface
             t.TextColor3 = (tName == CurrentTab) and Color3.new(1,1,1) or C.textMuted
         end
-        -- Update header button text color
-        for _, btn in ipairs(btnContainer:GetChildren()) do
-            if btn:IsA("TextButton") then btn.TextColor3 = C.text end
-        end
+        for _, b in ipairs(btnContainer:GetChildren()) do if b:IsA("TextButton") then b.TextColor3 = C.text end end
     end)
 end
 
 local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, 0, 0, 30) hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) hideBtn.Text = "Sembunyikan Hub (Hide)" hideBtn.TextColor3 = Color3.new(1,1,1) hideBtn.Font = Enum.Font.GothamBold hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0,8) hc.Parent = hideBtn
-hideBtn.MouseButton1Click:Connect(function()
-    settingsPanel.Visible = false
+
+-- ANIMASI DINAMIS (Dynamic Island)
+local isPulsing = false
+local pulseThread
+
+local function startIslandEffects()
+    islandGlow.Transparency = 0.5
+    shimmer.BackgroundTransparency = 0.9
+    if isPulsing then return end
+    isPulsing = true
+    
+    -- Animasi Glow Berdenyut
+    task.spawn(function()
+        while isPulsing do
+            tween(islandGlow, 1, {Transparency = 0.1, Thickness = 4}, Enum.EasingStyle.Sine):Play()
+            tween(shimmer, 1, {Position = UDim2.new(1.5, 0, 0, 0)}):Play()
+            task.wait(1)
+            tween(islandGlow, 1, {Transparency = 0.5, Thickness = 1}, Enum.EasingStyle.Sine):Play()
+            shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
+            task.wait(1)
+        end
+    end)
+end
+
+local function stopIslandEffects()
+    isPulsing = false
+    islandGlow.Transparency = 1
+    shimmer.BackgroundTransparency = 1
+    shimmer.Position = UDim2.new(-0.5, 0, 0, 0)
+end
+
+-- BUTTON EVENTS
+local function minimizeToIsland()
     IsMinimized = true
     tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-    tabBar.Visible = false; content.Visible = false; title.Text = "Kuro Island"; title.TextSize = 13; minBtn.Text = "□"
+    tabBar.Visible = false
+    content.Visible = false
+    title.Text = "Kuro Island"
+    title.TextSize = 13
+    minBtn.Text = "□"
+    startIslandEffects()
+end
+
+local function restoreFromIsland()
+    IsMinimized = false
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
+    tabBar.Visible = true
+    content.Visible = true
+    title.Text = "Kuro Hub | Blox Fruits"
+    title.TextSize = 14
+    minBtn.Text = "−"
+    stopIslandEffects()
+end
+
+hideBtn.MouseButton1Click:Connect(function()
+    settingsPanel.Visible = false
+    minimizeToIsland()
 end)
 
 minBtn.MouseButton1Click:Connect(function()
     if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end
-    IsMinimized = not IsMinimized
-    if IsMinimized then
-        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = false; content.Visible = false; title.Text = "Kuro Island"; title.TextSize = 13; minBtn.Text = "□"
-    else
-        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = true; content.Visible = true; title.Text = "Kuro Hub | Blox Fruits"; title.TextSize = 14; minBtn.Text = "−"
-    end
+    if IsMinimized then restoreFromIsland() else minimizeToIsland() end
 end)
 
 main.InputBegan:Connect(function(input)
     if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-        IsMinimized = false
-        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = true; content.Visible = true; title.Text = "Kuro Hub | Blox Fruits"; title.TextSize = 14; minBtn.Text = "−"
+        restoreFromIsland()
     end
 end)
 
