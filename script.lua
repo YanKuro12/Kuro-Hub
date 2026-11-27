@@ -146,7 +146,7 @@ local tabScroll = Instance.new("ScrollingFrame")
 tabScroll.Size = UDim2.fromScale(1, 1)
 tabScroll.BackgroundTransparency = 1
 tabScroll.ScrollBarThickness = 0
-tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0)
+tabScroll.CanvasSize = UDim2.new(0, 900, 0, 0)
 tabScroll.Parent = tabBar
 
 local tabLayout = Instance.new("UIListLayout")
@@ -174,7 +174,7 @@ local function makePage(name)
     
     local grid = Instance.new("UIGridLayout")
     grid.CellSize = UDim2.new(0, 280, 0, 85)
-    grid.CellPadding = UDim2.new(0, 10, 0, 10)
+    grid.CellPadding = UDim.new(0, 10, 0, 10)
     grid.Parent = scroll
     
     pages[name] = scroll
@@ -214,65 +214,104 @@ for _, tName in ipairs(menuTabs) do
 end
 
 -- ==========================================
--- STATUS PAGE CUSTOM UI (ALa Maru)
+-- STATUS PAGE (REVISI 2 BOX BESAR + PROFILE)
 -- ==========================================
 local statusGui = pages["Status"]
-statusGui.AutomaticCanvasSize = Enum.AutomaticSize.None
-statusGui.CanvasSize = UDim2.new(0,0,0,0)
+statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
+statusGui.ScrollBarThickness = 0
+
+-- Profile Section (Kiri Atas)
+local profileContainer = Instance.new("Frame")
+profileContainer.Size = UDim2.new(1, 0, 0, 60)
+profileContainer.Position = UDim2.fromOffset(0, 0)
+profileContainer.BackgroundTransparency = 1
+profileContainer.Parent = statusGui
+
+local avatar = Instance.new("ImageLabel")
+avatar.Size = UDim2.fromOffset(50, 50)
+avatar.BackgroundColor3 = C.surface
+avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=150&h=150"
+avatar.Parent = profileContainer
+local avCorner = Instance.new("UICorner") avCorner.CornerRadius = UDim.new(1, 0) avCorner.Parent = avatar
 
 local greet = Instance.new("TextLabel")
-greet.Size = UDim2.new(1, -20, 0, 30)
-greet.Position = UDim2.fromOffset(10, 5)
+greet.Size = UDim2.new(1, -70, 0, 25)
+greet.Position = UDim2.fromOffset(65, 5)
 greet.BackgroundTransparency = 1
-greet.Text = "Status & Informasi"
+greet.Text = "Good afternoon, " .. LP.DisplayName
 greet.TextColor3 = C.text
 greet.Font = Enum.Font.GothamBold
 greet.TextSize = 16
 greet.TextXAlignment = Enum.TextXAlignment.Left
-greet.Parent = statusGui
+greet.Parent = profileContainer
 
-local function createGridSection(title, yPos)
-    local titleLbl = Instance.new("TextLabel")
-    titleLbl.Size = UDim2.new(1, -20, 0, 15)
-    titleLbl.Position = UDim2.fromOffset(10, yPos)
-    titleLbl.BackgroundTransparency = 1
-    titleLbl.Text = title
-    titleLbl.TextColor3 = C.textMuted
-    titleLbl.Font = Enum.Font.GothamBold
-    titleLbl.TextSize = 10
-    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
-    titleLbl.Parent = statusGui
+local subGreet = Instance.new("TextLabel")
+subGreet.Size = UDim2.new(1, -70, 0, 15)
+subGreet.Position = UDim2.fromOffset(65, 28)
+subGreet.BackgroundTransparency = 1
+subGreet.Text = "Blox Fruits | User: " .. LP.Name
+subGreet.TextColor3 = C.textMuted
+subGreet.Font = Enum.Font.Gotham
+subGreet.TextSize = 12
+subGreet.TextXAlignment = Enum.TextXAlignment.Left
+subGreet.Parent = profileContainer
 
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -20, 0, 80)
-    container.Position = UDim2.fromOffset(10, yPos + 20)
-    container.BackgroundTransparency = 1
-    container.Parent = statusGui
+-- Container untuk 2 Box Besar
+local boxContainer = Instance.new("Frame")
+boxContainer.Size = UDim2.new(1, 0, 0, 300)
+boxContainer.Position = UDim2.fromOffset(0, 70)
+boxContainer.BackgroundTransparency = 1
+boxContainer.Parent = statusGui
 
-    local grid = Instance.new("UIGridLayout")
-    grid.CellSize = UDim2.new(0, 185, 0, 50)
-    grid.CellPadding = UDim2.new(0, 10, 0, 10)
-    grid.Parent = container
+local boxLayout = Instance.new("UIListLayout")
+boxLayout.Padding = UDim.new(0, 10)
+boxLayout.Parent = boxContainer
 
-    return container
+-- Fungsi buat bikin Box Besar
+local function createBigBox(titleText)
+    local box = Instance.new("Frame")
+    box.Size = UDim2.new(1, -10, 0, 130)
+    box.BackgroundColor3 = C.surface
+    box.Parent = boxContainer
+    
+    local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 8) bc.Parent = box
+    local bs = Instance.new("UIStroke") bs.Color = C.border bs.Parent = box
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -20, 0, 20)
+    lbl.Position = UDim2.fromOffset(10, 8)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = titleText
+    lbl.TextColor3 = C.textMuted
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = box
+
+    local grid = Instance.new("Frame")
+    grid.Size = UDim2.new(1, -20, 1, -40)
+    grid.Position = UDim2.fromOffset(10, 30)
+    grid.BackgroundTransparency = 1
+    grid.Parent = box
+
+    local gLayout = Instance.new("UIGridLayout")
+    gLayout.CellSize = UDim2.new(0, 140, 0, 40)
+    gLayout.CellPadding = UDim2.new(0, 10, 0, 10)
+    gLayout.Parent = grid
+
+    return grid
 end
 
-local function addStatBox(parent, titleText, initialVal)
+local function addSmallStat(parent, titleText, initialVal)
     local box = Instance.new("Frame")
-    box.BackgroundColor3 = C.surface
+    box.BackgroundColor3 = C.surfaceAlt
     box.Parent = parent
     
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 6)
-    c.Parent = box
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = box
     
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = C.border
-    stroke.Parent = box
-
     local t = Instance.new("TextLabel")
-    t.Size = UDim2.new(1, -16, 0, 15)
-    t.Position = UDim2.fromOffset(8, 8)
+    t.Size = UDim2.new(1, -12, 0, 15)
+    t.Position = UDim2.fromOffset(6, 4)
     t.BackgroundTransparency = 1
     t.Text = titleText
     t.TextColor3 = C.textMuted
@@ -282,35 +321,34 @@ local function addStatBox(parent, titleText, initialVal)
     t.Parent = box
 
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(1, -16, 0, 20)
-    v.Position = UDim2.fromOffset(8, 23)
+    v.Size = UDim2.new(1, -12, 0, 15)
+    v.Position = UDim2.fromOffset(6, 18)
     v.BackgroundTransparency = 1
     v.Text = initialVal
     v.TextColor3 = C.text
     v.Font = Enum.Font.GothamBold
-    v.TextSize = 12
+    v.TextSize = 11
     v.TextXAlignment = Enum.TextXAlignment.Left
     v.Parent = box
 
     return v
 end
 
--- Account Section
-local accContainer = createGridSection("ACCOUNT INFO", 45)
-local valName = addStatBox(accContainer, "Name", LP.Name)
-local valLevel = addStatBox(accContainer, "Level", "Loading...")
-local valRace = addStatBox(accContainer, "Race", "Loading...")
-local valBeli = addStatBox(accContainer, "Beli", "Loading...")
-local valFrag = addStatBox(accContainer, "Fragment", "Loading...")
+-- Box 1: Account Info
+local accGrid = createBigBox("ACCOUNT STATS")
+local valLevel = addSmallStat(accGrid, "Level", "Loading...")
+local valRace = addSmallStat(accGrid, "Race", "Loading...")
+local valBeli = addSmallStat(accGrid, "Beli", "Loading...")
+local valFrag = addSmallStat(accGrid, "Fragment", "Loading...")
 
--- Server Section
-local srvContainer = createGridSection("SERVER INFO", 155)
-local valPlaceId = addStatBox(srvContainer, "Place ID", tostring(game.PlaceId))
-local valSession = addStatBox(srvContainer, "Session Time", "0s")
-local valServerAge = addStatBox(srvContainer, "Server Age", "0s")
-local valPrehistoric = addStatBox(srvContainer, "Prehistoric Island", "Checking...")
-local valMirage = addStatBox(srvContainer, "Mirage Island", "Checking...")
-local valElite = addStatBox(srvContainer, "Elite Hunter", "Checking...")
+-- Box 2: Server Info
+local srvGrid = createBigBox("SERVER STATS")
+local valPlaceId = addSmallStat(srvGrid, "Place ID", tostring(game.PlaceId))
+local valSession = addSmallStat(srvGrid, "Session", "0s")
+local valServerAge = addSmallStat(srvGrid, "Server Age", "0s")
+local valPrehistoric = addSmallStat(srvGrid, "Prehistoric", "Not Found")
+local valMirage = addSmallStat(srvGrid, "Mirage", "Not Found")
+local valElite = addSmallStat(srvGrid, "Elite Hunter", "Not Found")
 
 -- Logic Update Data
 local startTime = tick()
@@ -324,7 +362,6 @@ end
 task.spawn(function()
     while task.wait(1) do
         pcall(function()
-            -- Account Stats
             local data = LP:FindFirstChild("Data")
             if data then
                 if data:FindFirstChild("Level") then valLevel.Text = tostring(data.Level.Value) end
@@ -333,11 +370,9 @@ task.spawn(function()
                 if data:FindFirstChild("Fragments") then valFrag.Text = tostring(data.Fragments.Value) end
             end
 
-            -- Server Stats
             valSession.Text = formatTime(tick() - startTime)
             valServerAge.Text = formatTime(workspace.DistributedGameTime)
 
-            -- Events Detection (Simple check)
             valPrehistoric.Text = (WS:FindFirstChild("Prehistoric Island") or WS:FindFirstChild("PrehistoricIsland")) and "ACTIVE" or "Not Found"
             valPrehistoric.TextColor3 = valPrehistoric.Text == "ACTIVE" and Color3.fromRGB(50, 255, 50) or C.text
             
@@ -350,9 +385,7 @@ task.spawn(function()
     end
 end)
 
--- ==========================================
--- COMPONENTS (Toggle & Settings)
--- ==========================================
+-- COMPONENTS
 local function createCard(parent, titleText, descText, toggleInitial, callback)
     local card = Instance.new("Frame")
     card.BackgroundColor3 = C.surface
@@ -405,7 +438,7 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
     
     local knob = Instance.new("Frame")
     knob.Size = UDim2.fromOffset(16, 16)
-    knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim.new(0, 2, 0.5, -8)
+    knob.Position = toggleInitial and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
     knob.BackgroundColor3 = Color3.new(1,1,1)
     knob.Parent = toggle
     
@@ -425,7 +458,7 @@ local function createCard(parent, titleText, descText, toggleInitial, callback)
     card.MouseLeave:Connect(function() tween(card, 0.1, {BackgroundColor3 = C.surface}):Play() end)
 end
 
--- SETTINGS PANEL
+-- SETTINGS PANEL (Sederhana biar ga kepanjangan)
 local settingsPanel = Instance.new("Frame")
 settingsPanel.Size = UDim2.new(1, -40, 1, -120)
 settingsPanel.Position = UDim2.fromOffset(20, 105)
@@ -448,7 +481,6 @@ local spLayout = Instance.new("UIListLayout")
 spLayout.Padding = UDim.new(0, 10)
 spLayout.Parent = spScroll
 
--- Theme Setting
 local themeCard = Instance.new("Frame")
 themeCard.Size = UDim2.new(1, -20, 0, 80)
 themeCard.BackgroundColor3 = C.surface
@@ -476,64 +508,13 @@ for i, tName in ipairs({"Blue", "Purple", "Green", "Red", "Yellow"}) do
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 9
     btn.Parent = themeCard
-    
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 4)
-    c.Parent = btn
-    
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 4) c.Parent = btn
     btn.MouseButton1Click:Connect(function()
         applyTheme(tName)
         main.BackgroundColor3 = C.bg
         header.BackgroundColor3 = C.surface
         headerFix.BackgroundColor3 = C.surface
         for _, t in pairs(tabButtons) do t.BackgroundColor3 = (t.Text == CurrentTab) and C.accent or C.surface end
-        setBtn.BackgroundColor3 = C.surfaceAlt
-        minBtn.BackgroundColor3 = C.surfaceAlt
-        closeBtn.BackgroundColor3 = C.surfaceAlt
-    end)
-end
-
--- Scale Setting
-local scaleCard = Instance.new("Frame")
-scaleCard.Size = UDim2.new(1, -20, 0, 80)
-scaleCard.BackgroundColor3 = C.surface
-scaleCard.Parent = spScroll
-local scCorner = Instance.new("UICorner") scCorner.CornerRadius = UDim.new(0,8) scCorner.Parent = scaleCard
-
-local scaleLbl = Instance.new("TextLabel")
-scaleLbl.Size = UDim2.new(1, -20, 0, 20)
-scaleLbl.Position = UDim2.fromOffset(10, 8)
-scaleLbl.BackgroundTransparency = 1
-scaleLbl.Text = "UI Scale"
-scaleLbl.TextColor3 = C.text
-scaleLbl.Font = Enum.Font.GothamBold
-scaleLbl.TextSize = 12
-scaleLbl.TextXAlignment = Enum.TextXAlignment.Left
-scaleLbl.Parent = scaleCard
-
-for i, s in ipairs({0.8, 1.0, 1.2, 1.4}) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(50, 20)
-    btn.Position = UDim2.fromOffset(10 + ((i-1)*56), 40)
-    btn.BackgroundColor3 = (s == UI_Scale) and C.accent or C.surfaceAlt
-    btn.Text = tostring(s) .. "x"
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 9
-    btn.Parent = scaleCard
-    
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 4)
-    c.Parent = btn
-    
-    btn.MouseButton1Click:Connect(function()
-        UI_Scale = s
-        tween(uiScale, 0.2, {Scale = UI_Scale}):Play()
-        for _, child in pairs(scaleCard:GetChildren()) do
-            if child:IsA("TextButton") then
-                child.BackgroundColor3 = (child.Text == tostring(s).."x") and C.accent or C.surfaceAlt
-            end
-        end
     end)
 end
 
@@ -546,16 +527,10 @@ hideBtn.TextColor3 = Color3.new(1,1,1)
 hideBtn.Font = Enum.Font.GothamBold
 hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0,8) hc.Parent = hideBtn
-
 hideBtn.MouseButton1Click:Connect(function()
     settingsPanel.Visible = false
     IsMinimized = true
-    tween(main, 0.4, {
-        AnchorPoint = Vector2.new(0.5, 0),
-        Position = UDim2.new(0.5, 0, 0, 15),
-        Size = UDim2.fromOffset(280, 40),
-        BackgroundTransparency = 0
-    }, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
     tabBar.Visible = false
     content.Visible = false
     title.Text = "Kuro Island"
@@ -563,35 +538,19 @@ hideBtn.MouseButton1Click:Connect(function()
     minBtn.Text = "□"
 end)
 
--- MINIMIZE (Dynamic Island Logic)
+-- MINIMIZE
 minBtn.MouseButton1Click:Connect(function()
-    if settingsPanel.Visible then
-        settingsPanel.Visible = false
-        content.Visible = true
-        return
-    end
-    
+    if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; return end
     IsMinimized = not IsMinimized
-    
     if IsMinimized then
-        tween(main, 0.4, {
-            AnchorPoint = Vector2.new(0.5, 0),
-            Position = UDim2.new(0.5, 0, 0, 15),
-            Size = UDim2.fromOffset(280, 40),
-            BackgroundTransparency = 0
-        }, Enum.EasingStyle.Back):Play()
+        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
         tabBar.Visible = false
         content.Visible = false
         title.Text = "KuroHub"
         title.TextSize = 13
         minBtn.Text = "□"
     else
-        tween(main, 0.4, {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(650, 420),
-            BackgroundTransparency = 0
-        }, Enum.EasingStyle.Back):Play()
+        tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(650, 420), BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
         tabBar.Visible = true
         content.Visible = true
         title.Text = "Kuro Hub | Blox Fruits"
@@ -600,67 +559,5 @@ minBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Klik Dimana Aja Pas Minimized Buat Balik
 main.InputBegan:Connect(function(input)
-    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-        IsMinimized = false
-        tween(main, 0.4, {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.fromOffset(650, 420),
-            BackgroundTransparency = 0
-        }, Enum.EasingStyle.Back):Play()
-        tabBar.Visible = true
-        content.Visible = true
-        title.Text = "Kuro Hub | Blox Fruits"
-        title.TextSize = 15
-        minBtn.Text = "−"
-    end
-end)
-
--- SETTINGS BUTTON
-setBtn.MouseButton1Click:Connect(function()
-    if IsMinimized then return end
-    settingsPanel.Visible = not settingsPanel.Visible
-    content.Visible = not settingsPanel.Visible
-    tabBar.Visible = not settingsPanel.Visible
-end)
-
--- CLOSE BUTTON
-closeBtn.MouseButton1Click:Connect(function()
-    local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1})
-    closeTween:Play()
-    TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
-    closeTween.Completed:Connect(function() gui:Destroy() end)
-end)
-
--- DRAG
-local dragging = false
-local dragInput, dragStart, startPos
-header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
-    end
-end)
-header.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
-end)
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- DEFAULT CARDS
-createCard(pages["Main"], "Auto Farm Level", "Farms mobs to max level.", false, function(s) print("Auto Farm:", s) end)
-createCard(pages["Main"], "Auto Secret Quests", "Completes Secret Quests.", false, function(s) print("Secret:", s) end)
-createCard(pages["Farm Settings"], "Auto Buso", "Auto activates Buso.", false, function(s) print("Buso:", s) end)
-createCard(pages["Farm Settings"], "Auto Ken", "Auto activates Ken.", false, function(s) print("Ken:", s) end)
-
-switchTab("Status")
+    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == 
