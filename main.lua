@@ -701,3 +701,11 @@ end)
 
 switchTab("Status")
 applyTheme("Gold")
+
+task.spawn(function()
+    task.wait(0.5)
+    local oldPos = main.Position
+    main.Position = UDim2.new(oldPos.X.Scale, oldPos.X.Offset + 1, oldPos.Y.Scale, oldPos.Y.Offset)
+    task.wait(0.1)
+    main.Position = oldPos
+end)
