@@ -183,7 +183,7 @@ end
 local gui = Instance.new("ScreenGui")
 gui.Name = "KuroHubUI"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
+gui.IgnoreGuiInset = false
 gui.DisplayOrder = 999
 
 local successCore, errCore = pcall(function()
@@ -698,12 +698,6 @@ UIS.InputChanged:Connect(function(input)
         main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) 
     end 
 end)
-
-local resizeBtn = Instance.new("TextButton"); resizeBtn.Size = UDim2.fromOffset(15, 15); resizeBtn.Position = UDim2.new(1, -15, 1, -15); resizeBtn.BackgroundColor3 = C.accent; resizeBtn.Text = ""; resizeBtn.Parent = main
-local rc = Instance.new("UICorner") rc.CornerRadius = UDim.new(0, 4) rc.Parent = resizeBtn
-local resizing = false; local resizeStart, startSize
-resizeBtn.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then resizing = true; resizeStart = input.Position; startSize = main.Size; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then resizing = false end end) end end)
-UIS.InputChanged:Connect(function(input) if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then local delta = input.Position - resizeStart; main.Size = UDim2.fromOffset(math.clamp(startSize.X.Offset + delta.X, 320, 800), math.clamp(startSize.Y.Offset + delta.Y, 250, 600)) end end)
 
 switchTab("Status")
 applyTheme("Gold")
