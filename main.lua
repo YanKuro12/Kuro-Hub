@@ -1,18 +1,42 @@
 local P = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
-local CG = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
 
+local function safeHttpGet(url)
+    local success, result = pcall(function()
+        if game.HttpGet then
+            return game:HttpGet(url)
+        elseif syn and syn.request then
+            return syn.request({Url = url, Method = "GET"}).Body
+        elseif http_request then
+            return http_request({Url = url, Method = "GET"}).Body
+        elseif request then
+            return request({Url = url, Method = "GET"}).Body
+        else
+            return game:HttpGet(url)
+        end
+    end)
+    return success and result or nil
+end
+
 local THEMES_URL = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/themes.lua"
-local Themes
-local ok, err = pcall(function()
-    Themes = loadstring(game:HttpGet(THEMES_URL))()
+local RESPONSIVE_URL = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/responsive.lua"
+
+local Themes, Responsive
+pcall(function()
+    local data = safeHttpGet(THEMES_URL)
+    if data then Themes = loadstring(data)() end
 end)
 
-if not ok or not Themes then
+pcall(function()
+    local data = safeHttpGet(RESPONSIVE_URL)
+    if data then Responsive = loadstring(data)() end
+end)
+
+if not Themes then
     Themes = {
         Gold = {
             name="Gold", accent=Color3.fromRGB(218,180,90), accent2=Color3.fromRGB(255,225,150),
@@ -161,7 +185,14 @@ gui.Name = "KuroHubUI"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.DisplayOrder = 999
-gui.Parent = CG
+
+local successCore, errCore = pcall(function()
+    gui.Parent = game:GetService("CoreGui")
+end)
+
+if not successCore then
+    gui.Parent = LP:WaitForChild("PlayerGui")
+end
 
 local main = Instance.new("Frame")
 main.Name = "Main"
@@ -175,18 +206,23 @@ main.Active = true
 main.ClipsDescendants = true
 main.Parent = gui
 
+if Responsive and Responsive.Apply then
+    Responsive.Apply(main, Vector2.new(500, 380))
+else
+    local uiScale = Instance.new("UIScale")
+    uiScale.Parent = main
+    local function updateScale()
+        local vp = workspace.CurrentCamera.ViewportSize
+        local sx = (vp.X * 0.9) / 500
+        local sy = (vp.Y * 0.9) / 380
+        uiScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.1)
+    end
+    updateScale()
+    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+end
+
 local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 14) mainCorner.Parent = main
 local mainStroke = Instance.new("UIStroke") mainStroke.Color = C.border mainStroke.Thickness = 1 mainStroke.Transparency = 0.4 mainStroke.Parent = main
-
-local uiScale = Instance.new("UIScale") uiScale.Parent = main
-local function updateScale()
-    local vp = workspace.CurrentCamera.ViewportSize
-    local sx = (vp.X * 0.9) / 500
-    local sy = (vp.Y * 0.9) / 380
-    uiScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.1)
-end
-updateScale()
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
@@ -451,7 +487,6 @@ for i, preset in ipairs(presetColors) do
     btn.TextColor3 = Color3.fromRGB(0,0,0)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 7
-    btn.TextScaled = false
     btn.Parent = presetContainer
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 4) c.Parent = btn
     
@@ -460,7 +495,7 @@ for i, preset in ipairs(presetColors) do
         Themes.Custom.accent2 = Color3.fromHex(preset.accent):Lerp(Color3.new(1,1,1), 0.5)
         Themes.Custom.bg = Color3.fromHex(preset.bg)
         Themes.Custom.surface = Color3.fromHex(preset.bg):Lerp(Color3.new(1,1,1), 0.1)
-        Themes.Custom.surfaceAlt = Color3.fromRGB(preset.bg):Lerp(Color3.new(1,1,1), 0.2)
+        Themes.Custom.surfaceAlt = Color3.fromHex(preset.bg):Lerp(Color3.new(1,1,1), 0.2)
         Themes.Custom.border = Color3.fromHex(preset.bg):Lerp(Color3.new(1,1,1), 0.3)
         Themes.Custom.particleColor = Color3.fromHex(preset.accent)
         applyTheme("Custom")
