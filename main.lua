@@ -5,35 +5,11 @@ local SoundService = game:GetService("SoundService")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
 
-local function safeHttpGet(url)
-    local success, result = pcall(function()
-        if game.HttpGet then
-            return game:HttpGet(url)
-        elseif syn and syn.request then
-            return syn.request({Url = url, Method = "GET"}).Body
-        elseif http_request then
-            return http_request({Url = url, Method = "GET"}).Body
-        elseif request then
-            return request({Url = url, Method = "GET"}).Body
-        else
-            return game:HttpGet(url)
-        end
-    end)
-    return success and result or nil
-end
-
 local THEMES_URL = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/themes.lua"
-local RESPONSIVE_URL = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/responsive.lua"
-
-local Themes, Responsive
+local Themes
 pcall(function()
-    local data = safeHttpGet(THEMES_URL)
+    local data = game:HttpGet(THEMES_URL)
     if data then Themes = loadstring(data)() end
-end)
-
-pcall(function()
-    local data = safeHttpGet(RESPONSIVE_URL)
-    if data then Responsive = loadstring(data)() end
 end)
 
 if not Themes then
@@ -186,13 +162,8 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = false
 gui.DisplayOrder = 999
 
-local successCore, errCore = pcall(function()
-    gui.Parent = game:GetService("CoreGui")
-end)
-
-if not successCore then
-    gui.Parent = LP:WaitForChild("PlayerGui")
-end
+local successCore = pcall(function() gui.Parent = game:GetService("CoreGui") end)
+if not successCore then gui.Parent = LP:WaitForChild("PlayerGui") end
 
 local main = Instance.new("Frame")
 main.Name = "Main"
@@ -206,23 +177,19 @@ main.Active = true
 main.ClipsDescendants = true
 main.Parent = gui
 
-if Responsive and Responsive.Apply then
-    Responsive.Apply(main, Vector2.new(500, 380))
-else
-    local uiScale = Instance.new("UIScale")
-    uiScale.Parent = main
-    local function updateScale()
-        local vp = workspace.CurrentCamera.ViewportSize
-        local sx = (vp.X * 0.9) / 500
-        local sy = (vp.Y * 0.9) / 380
-        uiScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.1)
-    end
-    updateScale()
-    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
-end
-
 local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 14) mainCorner.Parent = main
 local mainStroke = Instance.new("UIStroke") mainStroke.Color = C.border mainStroke.Thickness = 1 mainStroke.Transparency = 0.4 mainStroke.Parent = main
+
+local uiScale = Instance.new("UIScale")
+uiScale.Parent = main
+local function updateScale()
+    local vp = workspace.CurrentCamera.ViewportSize
+    local sx = (vp.X * 0.9) / 500
+    local sy = (vp.Y * 0.9) / 380
+    uiScale.Scale = math.clamp(math.min(sx, sy), 0.5, 1.1)
+end
+updateScale()
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
@@ -701,11 +668,3 @@ end)
 
 switchTab("Status")
 applyTheme("Gold")
-
-task.spawn(function()
-    task.wait(0.5)
-    local oldPos = main.Position
-    main.Position = UDim2.new(oldPos.X.Scale, oldPos.X.Offset + 1, oldPos.Y.Scale, oldPos.Y.Offset)
-    task.wait(0.1)
-    main.Position = oldPos
-end)
