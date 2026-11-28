@@ -21,8 +21,8 @@ if not ok or not Themes then
             text=Color3.fromRGB(240,238,230), textMuted=Color3.fromRGB(150,148,140),
             font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
             corner=14, cornerHeader=18, strokeThickness=1, strokeTransparency=0.4,
-            tabStyle="pill", glow=false, particles=nil,
-            glass=0.9, shimmer=false, sound="rbxassetid://6944742108",
+            tabStyle="pill", glow=false, particles="✨", particleColor=Color3.fromRGB(255,220,120),
+            glass=0.9, shimmer=true, sound="rbxassetid://6944742108",
         },
     }
 end
@@ -44,6 +44,16 @@ local C = {
 
 local function tween(obj, time, props, style)
     return TS:Create(obj, TweenInfo.new(time, style or Enum.EasingStyle.Quint, Enum.EasingDirection.Out), props)
+end
+
+local function playClick(T)
+    pcall(function()
+        local s = Instance.new("Sound")
+        s.SoundId = T.sound or "rbxassetid://6944742108"
+        s.Volume = 0.22; s.PlaybackSpeed = 1.1
+        s.Parent = SoundService; s:Play()
+        task.delay(2, function() s:Destroy() end)
+    end)
 end
 
 local function createSection(parent, titleText, descText)
@@ -187,10 +197,17 @@ local headerCorner = Instance.new("UICorner") headerCorner.CornerRadius = UDim.n
 local headerFix = Instance.new("Frame") headerFix.Size = UDim2.new(1, 0, 0, 10) headerFix.Position = UDim2.new(0, 0, 1, -10) headerFix.BackgroundColor3 = C.surface headerFix.BorderSizePixel = 0 headerFix.ZIndex = 2 headerFix.Parent = header
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -120, 1, 0) title.Position = UDim2.fromOffset(16, 0)
+title.Size = UDim2.new(1, -180, 1, 0) title.Position = UDim2.fromOffset(16, 0)
 title.BackgroundTransparency = 1 title.Text = "KURO HUB"
 title.TextColor3 = C.text title.Font = Enum.Font.GothamBold
 title.TextSize = 15 title.TextXAlignment = Enum.TextXAlignment.Left title.ZIndex = 3 title.Parent = header
+
+local searchFrame = Instance.new("Frame")
+searchFrame.AnchorPoint = Vector2.new(1, 0.5) searchFrame.Position = UDim2.new(1, -130, 0.5, 0)
+searchFrame.Size = UDim2.fromOffset(100, 24) searchFrame.BackgroundColor3 = C.surfaceAlt searchFrame.ZIndex = 3 searchFrame.Parent = header
+local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 6) searchCorner.Parent = searchFrame
+local searchIcon = Instance.new("TextLabel") searchIcon.Size = UDim2.fromOffset(20, 24) searchIcon.BackgroundTransparency = 1 searchIcon.Text = "🔍" searchIcon.TextSize = 10 searchIcon.Parent = searchFrame
+local searchBox = Instance.new("TextBox") searchBox.Size = UDim2.new(1, -24, 1, 0) searchBox.Position = UDim2.fromOffset(20, 0) searchBox.BackgroundTransparency = 1 searchBox.Text = "" searchBox.PlaceholderText = "Search..." searchBox.PlaceholderColor3 = C.textMuted searchBox.TextColor3 = C.text searchBox.Font = Enum.Font.Gotham searchBox.TextSize = 10 searchBox.TextXAlignment = Enum.TextXAlignment.Left searchBox.Parent = searchFrame
 
 local btnContainer = Instance.new("Frame")
 btnContainer.AnchorPoint = Vector2.new(1, 0.5) btnContainer.Position = UDim2.new(1, -12, 0.5, 0)
@@ -211,12 +228,14 @@ end
 
 local setBtn = createHeaderBtn("⚙", C.accent)
 local minBtn = createHeaderBtn("—", C.accent)
-local closeBtn = createHeaderBtn("✕", Color3.fromRGB(200, 70, 90))
+local closeBtn = createHeaderBtn("X", Color3.fromRGB(200, 70, 90))
 
 local tabBar = Instance.new("Frame")
 tabBar.Size = UDim2.new(1, -32, 0, 30) tabBar.Position = UDim2.fromOffset(16, 60)
 tabBar.BackgroundTransparency = 1 tabBar.ZIndex = 2 tabBar.Parent = main
-local tabScroll = Instance.new("ScrollingFrame") tabScroll.Size = UDim2.fromScale(1, 1) tabScroll.BackgroundTransparency = 1 tabScroll.ScrollBarThickness = 0 tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0) tabScroll.Parent = tabBar
+local tabScroll = Instance.new("ScrollingFrame") 
+tabScroll.Size = UDim2.fromScale(1, 1) tabScroll.BackgroundTransparency = 1 tabScroll.ScrollBarThickness = 0 
+tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0) tabScroll.Parent = tabBar
 local tabLayout = Instance.new("UIListLayout") tabLayout.FillDirection = Enum.FillDirection.Horizontal tabLayout.Padding = UDim.new(0, 4) tabLayout.Parent = tabScroll
 
 local content = Instance.new("Frame")
@@ -367,6 +386,20 @@ local themeCard = Instance.new("Frame") themeCard.Size = UDim2.new(1, -10, 0, 13
 local tcCorner = Instance.new("UICorner") tcCorner.CornerRadius = UDim.new(0, 8) tcCorner.Parent = themeCard
 local themeLbl = Instance.new("TextLabel") themeLbl.Size = UDim2.new(1, -20, 0, 20) themeLbl.Position = UDim2.fromOffset(10, 8) themeLbl.BackgroundTransparency = 1 themeLbl.Text = "CHANGE THEME" themeLbl.TextColor3 = C.text themeLbl.Font = Enum.Font.GothamBold themeLbl.TextSize = 12 themeLbl.TextXAlignment = Enum.TextXAlignment.Left themeLbl.Parent = themeCard
 
+local confirmFrame = Instance.new("Frame")
+confirmFrame.Size = UDim2.new(1, -32, 1, -110)
+confirmFrame.Position = UDim2.fromOffset(16, 100)
+confirmFrame.BackgroundColor3 = C.surface
+confirmFrame.Visible = false
+confirmFrame.ZIndex = 10
+confirmFrame.Parent = main
+local cfCorner = Instance.new("UICorner") cfCorner.CornerRadius = UDim.new(0, 8) cfCorner.Parent = confirmFrame
+local cfText = Instance.new("TextLabel") cfText.Size = UDim2.new(1, -20, 0, 40) cfText.Position = UDim2.fromOffset(10, 20) cfText.BackgroundTransparency = 1 cfText.Text = "Yakin mau menutup Kuro Hub?" cfText.TextColor3 = C.text cfText.Font = Enum.Font.GothamBold cfText.TextSize = 14 cfText.TextWrapped = true cfText.Parent = confirmFrame
+local yesBtn = Instance.new("TextButton") yesBtn.Size = UDim2.fromOffset(80, 30) yesBtn.Position = UDim2.new(0.5, -90, 1, -50) yesBtn.BackgroundColor3 = Color3.fromRGB(200, 70, 90) yesBtn.Text = "Ya, Tutup" yesBtn.TextColor3 = Color3.new(1,1,1) yesBtn.Font = Enum.Font.GothamBold yesBtn.TextSize = 11 yesBtn.Parent = confirmFrame
+local yc = Instance.new("UICorner") yc.CornerRadius = UDim.new(0, 6) yc.Parent = yesBtn
+local noBtn = Instance.new("TextButton") noBtn.Size = UDim2.fromOffset(80, 30) noBtn.Position = UDim2.new(0.5, 10, 1, -50) noBtn.BackgroundColor3 = C.surfaceAlt noBtn.Text = "Batal" noBtn.TextColor3 = C.text noBtn.Font = Enum.Font.GothamBold noBtn.TextSize = 11 noBtn.Parent = confirmFrame
+local nc = Instance.new("UICorner") nc.CornerRadius = UDim.new(0, 6) nc.Parent = noBtn
+
 local function createLandscape(T)
     local existing = main:FindFirstChild("LandscapeLayer")
     if existing then existing:Destroy() end
@@ -377,12 +410,8 @@ local function createLandscape(T)
     layer.BackgroundColor3 = T.bg
     layer.BorderSizePixel = 0
     layer.ZIndex = 0
-    layer.ClipsDescendants = true
+    layer.ClipsDescendants = false
     layer.Parent = main
-    
-    local uc = Instance.new("UICorner") 
-    uc.CornerRadius = UDim.new(0, 14)
-    uc.Parent = layer
 
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new{
@@ -393,22 +422,70 @@ local function createLandscape(T)
     grad.Rotation = 90
     grad.Parent = layer
 
-    for i = 1, 2 do
-        local orb = Instance.new("ImageLabel")
-        orb.Size = UDim2.fromScale(1.2, 1.2)
-        orb.Position = UDim2.fromScale(math.random(-30, 30)/100, math.random(-30, 30)/100)
-        orb.BackgroundTransparency = 1
-        orb.Image = "rbxassetid://1316045217"
-        orb.ImageColor3 = T.accent
-        orb.ImageTransparency = 0.9
-        orb.ZIndex = 0
-        orb.Parent = layer
+    if T.particles then
+        task.spawn(function()
+            while layer.Parent do
+                local p = Instance.new("TextLabel")
+                p.Size = UDim2.fromOffset(16,16)
+                p.BackgroundTransparency = 1
+                p.Text = T.particles
+                p.TextColor3 = T.particleColor
+                p.TextTransparency = 0.5
+                p.Font = Enum.Font.GothamBold
+                p.TextSize = 12
+                p.Position = UDim2.new(math.random(), 0, 1.05, 0)
+                p.Parent = layer
+                
+                local dur = math.random(30, 80) / 10
+                local tx = TS:Create(p, TweenInfo.new(dur, Enum.EasingStyle.Linear), {
+                    Position = UDim2.new(math.random(), 0, -0.1, 0),
+                    TextTransparency = 1
+                })
+                tx:Play()
+                tx.Completed:Connect(function() p:Destroy() end)
+                task.wait(0.3)
+            end
+        end)
     end
+
+    local R = 14
+    local function createCorner(posX, posY, isTop)
+        local mask = Instance.new("Frame")
+        mask.Size = UDim2.fromOffset(R, R)
+        mask.Position = UDim2.new(posX, 0, posY, 0)
+        mask.BackgroundColor3 = C.bg 
+        mask.BorderSizePixel = 0
+        mask.ZIndex = 1 
+        mask.Parent = main
+        
+        local c = Instance.new("UICorner")
+        c.CornerRadius = UDim.new(0, R)
+        c.Parent = mask
+        
+        local clip = Instance.new("Frame")
+        clip.Size = UDim2.fromScale(1, 1)
+        clip.BackgroundColor3 = C.bg
+        clip.BorderSizePixel = 0
+        clip.ZIndex = 1
+        clip.Parent = mask
+        
+        if isTop then
+            clip.Position = UDim2.fromOffset(0, R/2)
+        else
+            clip.Position = UDim2.fromOffset(0, -R/2)
+        end
+    end
+
+    createCorner(0, 0, true) 
+    createCorner(1, 0, true) 
+    createCorner(0, 1, false) 
+    createCorner(1, 1, false) 
 end
 
 local function applyTheme(themeName)
     local T = Themes[themeName]
     if not T then return end
+    playClick(T)
     CurrentTheme = themeName
     C.accent=T.accent; C.surface=T.surface; C.surfaceAlt=T.surfaceAlt
     C.bg=T.bg; C.border=T.border; C.text=T.text; C.textMuted=T.textMuted
@@ -428,7 +505,7 @@ local function applyTheme(themeName)
     end
 
     for _, d in ipairs(main:GetDescendants()) do
-        if d:IsA("Frame") or d:IsA("TextButton") or d:IsA("TextLabel") then
+        if d:IsA("Frame") or d:IsA("TextButton") or d:IsA("TextLabel") or d:IsA("TextBox") then
             if d:FindFirstChildOfClass("UICorner") and d~=main and d~=header and d.Name~="LandscapeLayer" then
                 d:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, T.corner)
             end
@@ -479,13 +556,23 @@ minBtn.MouseButton1Click:Connect(function()
     if IsMinimized then restoreFromIsland() else minimizeToIsland() end 
 end)
 main.InputBegan:Connect(function(input) if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then restoreFromIsland() end end)
+
 setBtn.MouseButton1Click:Connect(function() 
     if IsMinimized then return end
     settingsPanel.Visible = not settingsPanel.Visible
     content.Visible = not settingsPanel.Visible
     tabBar.Visible = not settingsPanel.Visible
 end)
-closeBtn.MouseButton1Click:Connect(function() 
+
+closeBtn.MouseButton1Click:Connect(function()
+    confirmFrame.Visible = true
+end)
+
+noBtn.MouseButton1Click:Connect(function()
+    confirmFrame.Visible = false
+end)
+
+yesBtn.MouseButton1Click:Connect(function()
     local closeTween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1})
     closeTween:Play()
     TS:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
