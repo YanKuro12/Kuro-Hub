@@ -30,9 +30,12 @@ function Responsive.Apply(mainFrame, originalSize)
     end
     
     update()
-    UIS:GetPropertyChangedSignal("ViewportSize"):Connect(update)
     
-    local success, err = pcall(function()
+    local success1 = pcall(function()
+        UIS:GetPropertyChangedSignal("ViewportSize"):Connect(update)
+    end)
+    
+    local success2 = pcall(function()
         workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(update)
     end)
     
