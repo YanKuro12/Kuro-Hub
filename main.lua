@@ -159,6 +159,7 @@ main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.Position = UDim2.fromScale(0.5, 0.5)
 main.Size = UDim2.fromOffset(500, 380)
 main.BackgroundColor3 = C.bg
+main.BackgroundTransparency = 1
 main.BorderSizePixel = 0
 main.Active = true
 main.ClipsDescendants = true
@@ -180,19 +181,20 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateS
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
 header.BackgroundColor3 = C.surface
+header.ZIndex = 2
 header.Parent = main
 local headerCorner = Instance.new("UICorner") headerCorner.CornerRadius = UDim.new(0, 14) headerCorner.Parent = header
-local headerFix = Instance.new("Frame") headerFix.Size = UDim2.new(1, 0, 0, 10) headerFix.Position = UDim2.new(0, 0, 1, -10) headerFix.BackgroundColor3 = C.surface headerFix.BorderSizePixel = 0 headerFix.Parent = header
+local headerFix = Instance.new("Frame") headerFix.Size = UDim2.new(1, 0, 0, 10) headerFix.Position = UDim2.new(0, 0, 1, -10) headerFix.BackgroundColor3 = C.surface headerFix.BorderSizePixel = 0 headerFix.ZIndex = 2 headerFix.Parent = header
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -120, 1, 0) title.Position = UDim2.fromOffset(16, 0)
 title.BackgroundTransparency = 1 title.Text = "KURO HUB"
 title.TextColor3 = C.text title.Font = Enum.Font.GothamBold
-title.TextSize = 15 title.TextXAlignment = Enum.TextXAlignment.Left title.Parent = header
+title.TextSize = 15 title.TextXAlignment = Enum.TextXAlignment.Left title.ZIndex = 3 title.Parent = header
 
 local btnContainer = Instance.new("Frame")
 btnContainer.AnchorPoint = Vector2.new(1, 0.5) btnContainer.Position = UDim2.new(1, -12, 0.5, 0)
-btnContainer.Size = UDim2.fromOffset(96, 24) btnContainer.BackgroundTransparency = 1 btnContainer.Parent = header
+btnContainer.Size = UDim2.fromOffset(96, 24) btnContainer.BackgroundTransparency = 1 btnContainer.ZIndex = 3 btnContainer.Parent = header
 local btnLayout = Instance.new("UIListLayout") btnLayout.FillDirection = Enum.FillDirection.Horizontal btnLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right btnLayout.Padding = UDim.new(0, 6) btnLayout.Parent = btnContainer
 
 local function createHeaderBtn(icon, hoverColor)
@@ -213,13 +215,13 @@ local closeBtn = createHeaderBtn("✕", Color3.fromRGB(200, 70, 90))
 
 local tabBar = Instance.new("Frame")
 tabBar.Size = UDim2.new(1, -32, 0, 30) tabBar.Position = UDim2.fromOffset(16, 60)
-tabBar.BackgroundTransparency = 1 tabBar.Parent = main
+tabBar.BackgroundTransparency = 1 tabBar.ZIndex = 2 tabBar.Parent = main
 local tabScroll = Instance.new("ScrollingFrame") tabScroll.Size = UDim2.fromScale(1, 1) tabScroll.BackgroundTransparency = 1 tabScroll.ScrollBarThickness = 0 tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0) tabScroll.Parent = tabBar
 local tabLayout = Instance.new("UIListLayout") tabLayout.FillDirection = Enum.FillDirection.Horizontal tabLayout.Padding = UDim.new(0, 4) tabLayout.Parent = tabScroll
 
 local content = Instance.new("Frame")
 content.Size = UDim2.new(1, -32, 1, -110) content.Position = UDim2.fromOffset(16, 100)
-content.BackgroundTransparency = 1 content.Parent = main
+content.BackgroundTransparency = 1 content.ZIndex = 2 content.Parent = main
 
 local pages = {}
 local function makePage(name)
@@ -352,8 +354,9 @@ createToggle(fsPage, "Auto Ken", "Auto activates Ken (Observation).", false, fun
 local settingsPanel = Instance.new("Frame") 
 settingsPanel.Size = UDim2.new(1, -32, 1, -110) 
 settingsPanel.Position = UDim2.fromOffset(16, 100) 
-settingsPanel.BackgroundColor3 = C.bg 
+settingsPanel.BackgroundTransparency = 1 
 settingsPanel.Visible = false 
+settingsPanel.ZIndex = 2
 settingsPanel.Parent = main
 local spCorner = Instance.new("UICorner") spCorner.CornerRadius = UDim.new(0, 8) spCorner.Parent = settingsPanel
 local spScroll = Instance.new("ScrollingFrame") spScroll.Size = UDim2.fromScale(1,1) spScroll.BackgroundTransparency = 1 spScroll.ScrollBarThickness = 2 spScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y spScroll.Parent = settingsPanel
@@ -374,6 +377,7 @@ local function createLandscape(T)
     layer.BackgroundColor3 = T.bg
     layer.BorderSizePixel = 0
     layer.ZIndex = 0
+    layer.ClipsDescendants = true
     layer.Parent = main
     
     local uc = Instance.new("UICorner") 
@@ -411,7 +415,6 @@ local function applyTheme(themeName)
 
     createLandscape(T)
 
-    main.BackgroundColor3 = C.bg
     mainStroke.Color = C.border
     header.BackgroundColor3 = C.surface
     headerFix.BackgroundColor3 = C.surface
@@ -458,14 +461,14 @@ local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 8) hc.Parent =
 
 local function minimizeToIsland()
     IsMinimized = true
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundColor3 = Color3.fromRGB(15, 15, 20)}, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundColor3 = C.surface, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(1, 0)}):Play()
     mainStroke.Transparency = 1; tabBar.Visible = false; content.Visible = false; title.Text = "KURO"; title.TextSize = 13; minBtn.Text = "□"
 end
 
 local function restoreFromIsland()
     IsMinimized = false
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg}, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg, BackgroundTransparency = 1}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(0, 14)}):Play()
     mainStroke.Transparency = 0; tabBar.Visible = true; content.Visible = true; title.Text = "KURO HUB"; title.TextSize = 15; minBtn.Text = "—"
 end
