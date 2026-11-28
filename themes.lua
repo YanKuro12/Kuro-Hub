@@ -1,4 +1,4 @@
-local Themes = {
+return {
     Gold = {
         name="Gold", accent=Color3.fromRGB(212,175,55), accent2=Color3.fromRGB(255,230,150),
         surface=Color3.fromRGB(24,24,28), surfaceAlt=Color3.fromRGB(32,32,38),
@@ -6,9 +6,9 @@ local Themes = {
         text=Color3.fromRGB(240,238,230), textMuted=Color3.fromRGB(150,148,140),
         font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
         corner=14, cornerHeader=18, strokeThickness=1, strokeTransparency=0.4,
-        tabStyle="pill", ease=Enum.EasingStyle.Quint,
-        glow=true, particles="✨", particleColor=Color3.fromRGB(255,220,120),
+        tabStyle="pill", glow=true, particles="✨", particleColor=Color3.fromRGB(255,220,120),
         glass=0.85, shimmer=true, sound="rbxassetid://6944742108",
+        landscape={"✨","✦","·"},
     },
     Obsidian = {
         name="Obsidian", accent=Color3.fromRGB(120,200,255), accent2=Color3.fromRGB(60,120,200),
@@ -17,9 +17,9 @@ local Themes = {
         text=Color3.fromRGB(235,240,250), textMuted=Color3.fromRGB(130,140,160),
         font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
         corner=6, cornerHeader=8, strokeThickness=1, strokeTransparency=0.2,
-        tabStyle="underline", ease=Enum.EasingStyle.Quart,
-        glow=false, particles="•", particleColor=Color3.fromRGB(120,200,255),
+        tabStyle="underline", glow=false, particles="•", particleColor=Color3.fromRGB(120,200,255),
         glass=0.9, shimmer=false, sound="rbxassetid://6944742108",
+        landscape={"•","◦","·"},
     },
     Halloween = {
         name="Halloween", accent=Color3.fromRGB(255,140,0), accent2=Color3.fromRGB(180,80,220),
@@ -28,9 +28,9 @@ local Themes = {
         text=Color3.fromRGB(255,230,200), textMuted=Color3.fromRGB(180,150,200),
         font=Enum.Font.GothamBlack, fontBody=Enum.Font.Gotham,
         corner=10, cornerHeader=14, strokeThickness=2, strokeTransparency=0.25,
-        tabStyle="pill", ease=Enum.EasingStyle.Back,
-        glow=true, particles="🎃", particleColor=Color3.fromRGB(255,140,0),
+        tabStyle="pill", glow=true, particles="🎃", particleColor=Color3.fromRGB(255,140,0),
         glass=0.82, shimmer=true, sound="rbxassetid://6944742108",
+        landscape={"🎃","👻","🦇","✦"},
     },
     Hacker = {
         name="Hacker", accent=Color3.fromRGB(0,255,120), accent2=Color3.fromRGB(0,160,80),
@@ -39,9 +39,9 @@ local Themes = {
         text=Color3.fromRGB(0,255,120), textMuted=Color3.fromRGB(0,160,80),
         font=Enum.Font.Code, fontBody=Enum.Font.Code,
         corner=2, cornerHeader=2, strokeThickness=1, strokeTransparency=0,
-        tabStyle="bracket", ease=Enum.EasingStyle.Linear,
-        glow=true, particles="01", particleColor=Color3.fromRGB(0,255,120),
+        tabStyle="bracket", glow=true, particles="01", particleColor=Color3.fromRGB(0,255,120),
         glass=0.95, shimmer=false, sound="rbxassetid://6944742108",
+        landscape={"0","1","{","}","<",">"},
     },
     Christmas = {
         name="Christmas", accent=Color3.fromRGB(220,40,50), accent2=Color3.fromRGB(60,200,120),
@@ -50,9 +50,9 @@ local Themes = {
         text=Color3.fromRGB(240,255,245), textMuted=Color3.fromRGB(150,190,170),
         font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
         corner=16, cornerHeader=20, strokeThickness=1, strokeTransparency=0.3,
-        tabStyle="pill", ease=Enum.EasingStyle.Quint,
-        glow=true, particles="❄", particleColor=Color3.fromRGB(220,240,255),
+        tabStyle="pill", glow=true, particles="❄", particleColor=Color3.fromRGB(220,240,255),
         glass=0.85, shimmer=true, sound="rbxassetid://6944742108",
+        landscape={"❄","✧","*","✦"},
     },
     Valentine = {
         name="Valentine", accent=Color3.fromRGB(255,90,150), accent2=Color3.fromRGB(200,40,90),
@@ -61,9 +61,8 @@ local Themes = {
         text=Color3.fromRGB(255,235,245), textMuted=Color3.fromRGB(200,150,175),
         font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
         corner=20, cornerHeader=22, strokeThickness=1, strokeTransparency=0.2,
-        tabStyle="pill", ease=Enum.EasingStyle.Quint,
-        glow=true, particles="💗", particleColor=Color3.fromRGB(255,90,150),
+        tabStyle="pill", glow=true, particles="💗", particleColor=Color3.fromRGB(255,90,150),
         glass=0.85, shimmer=true, sound="rbxassetid://6944742108",
+        landscape={"💗","♡","✦","·"},
     },
 }
-return Themes
