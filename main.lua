@@ -404,14 +404,17 @@ local function createLandscape(T)
     local existing = main:FindFirstChild("LandscapeLayer")
     if existing then existing:Destroy() end
 
-    local layer = Instance.new("Frame")
+    local layer = Instance.new("CanvasGroup")
     layer.Name = "LandscapeLayer"
     layer.Size = UDim2.fromScale(1, 1)
     layer.BackgroundColor3 = T.bg
     layer.BorderSizePixel = 0
     layer.ZIndex = 0
-    layer.ClipsDescendants = false
     layer.Parent = main
+    
+    local uc = Instance.new("UICorner") 
+    uc.CornerRadius = UDim.new(0, 14)
+    uc.Parent = layer
 
     local grad = Instance.new("UIGradient")
     grad.Color = ColorSequence.new{
@@ -447,39 +450,6 @@ local function createLandscape(T)
             end
         end)
     end
-
-    local R = 14
-    local function createCorner(posX, posY, isTop)
-        local mask = Instance.new("Frame")
-        mask.Size = UDim2.fromOffset(R, R)
-        mask.Position = UDim2.new(posX, 0, posY, 0)
-        mask.BackgroundColor3 = C.bg 
-        mask.BorderSizePixel = 0
-        mask.ZIndex = 1 
-        mask.Parent = main
-        
-        local c = Instance.new("UICorner")
-        c.CornerRadius = UDim.new(0, R)
-        c.Parent = mask
-        
-        local clip = Instance.new("Frame")
-        clip.Size = UDim2.fromScale(1, 1)
-        clip.BackgroundColor3 = C.bg
-        clip.BorderSizePixel = 0
-        clip.ZIndex = 1
-        clip.Parent = mask
-        
-        if isTop then
-            clip.Position = UDim2.fromOffset(0, R/2)
-        else
-            clip.Position = UDim2.fromOffset(0, -R/2)
-        end
-    end
-
-    createCorner(0, 0, true) 
-    createCorner(1, 0, true) 
-    createCorner(0, 1, false) 
-    createCorner(1, 1, false) 
 end
 
 local function applyTheme(themeName)
