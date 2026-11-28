@@ -6,9 +6,6 @@ local SoundService = game:GetService("SoundService")
 local LP = P.LocalPlayer
 local WS = game:GetService("Workspace")
 
--- ==========================================
--- LOAD THEMES
--- ==========================================
 local THEMES_URL = "https://raw.githubusercontent.com/YanKuro12/Kuro-Hub/main/themes.lua"
 local Themes
 local ok, err = pcall(function()
@@ -31,9 +28,6 @@ if not ok or not Themes then
 end
 local ThemeOrder = {"Gold","Obsidian","Halloween","Hacker","Christmas","Valentine"}
 
--- ==========================================
--- GLOBAL VARIABLES
--- ==========================================
 _G.KuroAutoFarm = false; _G.KuroAutoSecret = false; _G.KuroAutoBuso = false
 _G.KuroAutoKen = false; _G.KuroRaidBuyChip = false; _G.KuroRaidFarm = false
 _G.KuroRaidKill = false; _G.KuroRaidStart = false; _G.KuroRaidAwake = false
@@ -52,9 +46,6 @@ local function tween(obj, time, props, style)
     return TS:Create(obj, TweenInfo.new(time, style or Enum.EasingStyle.Quint, Enum.EasingDirection.Out), props)
 end
 
--- ==========================================
--- KOMPONEN UI
--- ==========================================
 local function createSection(parent, titleText, descText)
     local section = Instance.new("Frame")
     section.Size = UDim2.new(1, -10, 0, 44)
@@ -155,9 +146,6 @@ local function createDropdown(parent, titleText, options, callback)
     end)
 end
 
--- ==========================================
--- GUI UTAMA (FIX RESPONSIVE)
--- ==========================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "KuroHubUI"
 gui.ResetOnSpawn = false
@@ -189,7 +177,6 @@ end
 updateScale()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
--- HEADER & TOMBOL (FIX ILANG)
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
 header.BackgroundColor3 = C.surface
@@ -224,7 +211,6 @@ local setBtn = createHeaderBtn("⚙", C.accent)
 local minBtn = createHeaderBtn("—", C.accent)
 local closeBtn = createHeaderBtn("✕", Color3.fromRGB(200, 70, 90))
 
--- TAB BAR
 local tabBar = Instance.new("Frame")
 tabBar.Size = UDim2.new(1, -32, 0, 30) tabBar.Position = UDim2.fromOffset(16, 60)
 tabBar.BackgroundTransparency = 1 tabBar.Parent = main
@@ -271,9 +257,6 @@ for _, tName in ipairs(menuTabs) do
     tabButtons[tName] = btn
 end
 
--- ==========================================
--- TAB STATUS
--- ==========================================
 local statusGui = pages["Status"]
 statusGui.AutomaticCanvasSize = Enum.AutomaticSize.Y
 statusGui.ScrollBarThickness = 0
@@ -347,17 +330,11 @@ task.spawn(function()
     end
 end)
 
--- ==========================================
--- TAB MAIN
--- ==========================================
 local mainPage = pages["Main"]
 createSection(mainPage, "Auto Farm", "Konfigurasi farming level & secret.")
 createToggle(mainPage, "Auto Farm Level", "Farms mobs to max level.", false, function(s) _G.KuroAutoFarm = s end)
 createToggle(mainPage, "Auto Secret Quests", "Completes Secret Quests.", false, function(s) _G.KuroAutoSecret = s end)
 
--- ==========================================
--- TAB RAID
--- ==========================================
 local raidPage = pages["RAID"]
 createSection(raidPage, "Normal Raid", "Fitur untuk semua jenis raid (kecuali Law).")
 createDropdown(raidPage, "Choice Raid", {"Flame", "Ice", "Dark", "Sand", "Quake", "Buddha", "Spider", "Dough", "Phoenix"}, function(val) _G.KuroRaidChoice = val end)
@@ -367,17 +344,11 @@ createToggle(raidPage, "Instant Kill NPC", "Bunuh bos secara instan.", false, fu
 createToggle(raidPage, "Auto Start Raid", "Mulai raid otomatis.", false, function(s) _G.KuroRaidStart = s end)
 createToggle(raidPage, "Auto Awakening", "Buka awakening fruit otomatis.", false, function(s) _G.KuroRaidAwake = s end)
 
--- ==========================================
--- TAB FARM SETTINGS
--- ==========================================
 local fsPage = pages["Farm Settings"]
 createSection(fsPage, "Buff System", "Nyalain buff secara otomatis saat farm.")
 createToggle(fsPage, "Auto Buso", "Auto activates Buso (Armament).", false, function(s) _G.KuroAutoBuso = s end)
 createToggle(fsPage, "Auto Ken", "Auto activates Ken (Observation).", false, function(s) _G.KuroAutoKen = s end)
 
--- ==========================================
--- SETTINGS PANEL
--- ==========================================
 local settingsPanel = Instance.new("Frame") 
 settingsPanel.Size = UDim2.new(1, -32, 1, -110) 
 settingsPanel.Position = UDim2.fromOffset(16, 100) 
@@ -393,18 +364,86 @@ local themeCard = Instance.new("Frame") themeCard.Size = UDim2.new(1, -10, 0, 13
 local tcCorner = Instance.new("UICorner") tcCorner.CornerRadius = UDim.new(0, 8) tcCorner.Parent = themeCard
 local themeLbl = Instance.new("TextLabel") themeLbl.Size = UDim2.new(1, -20, 0, 20) themeLbl.Position = UDim2.fromOffset(10, 8) themeLbl.BackgroundTransparency = 1 themeLbl.Text = "CHANGE THEME" themeLbl.TextColor3 = C.text themeLbl.Font = Enum.Font.GothamBold themeLbl.TextSize = 12 themeLbl.TextXAlignment = Enum.TextXAlignment.Left themeLbl.Parent = themeCard
 
--- Dummy Apply Theme buat tes
-local function applyTheme(name)
-    print("Theme changed to", name)
+local function createLandscape(T)
+    local existing = main:FindFirstChild("LandscapeLayer")
+    if existing then existing:Destroy() end
+
+    local layer = Instance.new("Frame")
+    layer.Name = "LandscapeLayer"
+    layer.Size = UDim2.fromScale(1, 1)
+    layer.BackgroundColor3 = T.bg
+    layer.BorderSizePixel = 0
+    layer.ZIndex = 0
+    layer.Parent = main
+    
+    local uc = Instance.new("UICorner") 
+    uc.CornerRadius = UDim.new(0, 14)
+    uc.Parent = layer
+
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, T.bg),
+        ColorSequenceKeypoint.new(0.5, T.surface),
+        ColorSequenceKeypoint.new(1, T.bg),
+    }
+    grad.Rotation = 90
+    grad.Parent = layer
+
+    for i = 1, 2 do
+        local orb = Instance.new("ImageLabel")
+        orb.Size = UDim2.fromScale(1.2, 1.2)
+        orb.Position = UDim2.fromScale(math.random(-30, 30)/100, math.random(-30, 30)/100)
+        orb.BackgroundTransparency = 1
+        orb.Image = "rbxassetid://1316045217"
+        orb.ImageColor3 = T.accent
+        orb.ImageTransparency = 0.9
+        orb.ZIndex = 0
+        orb.Parent = layer
+    end
 end
 
-for i, tName in ipairs({"Gold", "Obsidian", "Halloween", "Hacker", "Christmas", "Valentine"}) do
+local function applyTheme(themeName)
+    local T = Themes[themeName]
+    if not T then return end
+    CurrentTheme = themeName
+    C.accent=T.accent; C.surface=T.surface; C.surfaceAlt=T.surfaceAlt
+    C.bg=T.bg; C.border=T.border; C.text=T.text; C.textMuted=T.textMuted
+
+    createLandscape(T)
+
+    main.BackgroundColor3 = C.bg
+    mainStroke.Color = C.border
+    header.BackgroundColor3 = C.surface
+    headerFix.BackgroundColor3 = C.surface
+    title.TextColor3 = C.text
+    subGreet.TextColor3 = C.accent
+
+    for tName, btn in pairs(tabButtons) do
+        local isActive = (tName == CurrentTab)
+        btn.BackgroundColor3 = isActive and C.accent or C.surface
+        btn.TextColor3 = isActive and Color3.fromRGB(20,20,20) or C.textMuted
+    end
+
+    for _, d in ipairs(main:GetDescendants()) do
+        if d:IsA("Frame") or d:IsA("TextButton") or d:IsA("TextLabel") then
+            if d:FindFirstChildOfClass("UICorner") and d~=main and d~=header and d.Name~="LandscapeLayer" then
+                d:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, T.corner)
+            end
+            if d:FindFirstChildOfClass("UIStroke") and d~=main then
+                local s = d:FindFirstChildOfClass("UIStroke")
+                s.Color = C.border
+            end
+        end
+    end
+end
+
+for i, tName in ipairs(ThemeOrder) do
     local col = (i-1) % 3
     local row = math.floor((i-1)/3)
     local btn = Instance.new("TextButton") 
     btn.Size = UDim2.fromOffset(85, 24) 
     btn.Position = UDim2.fromOffset(10 + col*90, 35 + row*30) 
-    btn.BackgroundColor3 = Color3.fromRGB(212,175,55) 
+    btn.BackgroundColor3 = Themes[tName].accent 
     btn.Text = tName 
     btn.TextColor3 = Color3.fromRGB(0,0,0) 
     btn.Font = Enum.Font.GothamBold 
@@ -417,9 +456,6 @@ end
 local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, -10, 0, 30) hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) hideBtn.Text = "Sembunyikan Hub (Hide)" hideBtn.TextColor3 = Color3.new(1,1,1) hideBtn.Font = Enum.Font.GothamBold hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 8) hc.Parent = hideBtn
 
--- ==========================================
--- LOGIKA MINIMIZE, CLOSE, & DRAG
--- ==========================================
 local function minimizeToIsland()
     IsMinimized = true
     tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundColor3 = Color3.fromRGB(15, 15, 20)}, Enum.EasingStyle.Back):Play()
@@ -468,7 +504,6 @@ UIS.InputChanged:Connect(function(input)
     end 
 end)
 
--- Resize Handle
 local resizeBtn = Instance.new("TextButton"); resizeBtn.Size = UDim2.fromOffset(15, 15); resizeBtn.Position = UDim2.new(1, -15, 1, -15); resizeBtn.BackgroundColor3 = C.accent; resizeBtn.Text = ""; resizeBtn.Parent = main
 local rc = Instance.new("UICorner") rc.CornerRadius = UDim.new(0, 4) rc.Parent = resizeBtn
 local resizing = false; local resizeStart, startSize
@@ -476,3 +511,4 @@ resizeBtn.InputBegan:Connect(function(input) if input.UserInputType == Enum.User
 UIS.InputChanged:Connect(function(input) if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then local delta = input.Position - resizeStart; main.Size = UDim2.fromOffset(math.clamp(startSize.X.Offset + delta.X, 320, 800), math.clamp(startSize.Y.Offset + delta.Y, 250, 600)) end end)
 
 switchTab("Status")
+applyTheme("Gold")
