@@ -6,25 +6,25 @@ local WS = game:GetService("Workspace")
 
 local Themes = {
     Gold = {
-        name="Gold", accent=Color3.fromRGB(218,180,90), accent2=Color3.fromRGB(255,225,150),
+        name="Gold", accent=Color3.fromRGB(218,180,90),
         surface=Color3.fromRGB(24,24,28), surfaceAlt=Color3.fromRGB(34,34,40),
         bg=Color3.fromRGB(14,14,17), border=Color3.fromRGB(65,60,45),
         text=Color3.fromRGB(245,243,235), textMuted=Color3.fromRGB(160,158,150),
     },
     Obsidian = {
-        name="Obsidian", accent=Color3.fromRGB(130,200,255), accent2=Color3.fromRGB(70,130,210),
+        name="Obsidian", accent=Color3.fromRGB(130,200,255),
         surface=Color3.fromRGB(20,22,28), surfaceAlt=Color3.fromRGB(28,30,38),
         bg=Color3.fromRGB(10,12,16), border=Color3.fromRGB(45,50,60),
         text=Color3.fromRGB(235,240,250), textMuted=Color3.fromRGB(140,150,170),
     },
     Hacker = {
-        name="Hacker", accent=Color3.fromRGB(0,210,110), accent2=Color3.fromRGB(0,150,80),
+        name="Hacker", accent=Color3.fromRGB(0,210,110),
         surface=Color3.fromRGB(6,18,10), surfaceAlt=Color3.fromRGB(12,28,18),
         bg=Color3.fromRGB(2,10,5), border=Color3.fromRGB(0,80,40),
         text=Color3.fromRGB(200,255,220), textMuted=Color3.fromRGB(100,180,140),
     },
     Neon = {
-        name="Neon", accent=Color3.fromRGB(255,80,200), accent2=Color3.fromRGB(80,220,255),
+        name="Neon", accent=Color3.fromRGB(255,80,200),
         surface=Color3.fromRGB(18,15,25), surfaceAlt=Color3.fromRGB(28,22,38),
         bg=Color3.fromRGB(8,5,12), border=Color3.fromRGB(200,50,180),
         text=Color3.fromRGB(255,255,255), textMuted=Color3.fromRGB(190,180,220),
@@ -55,7 +55,6 @@ local function createSection(parent, titleText, descText)
     section.Size = UDim2.new(1, -10, 0, 44)
     section.BackgroundTransparency = 1
     section.Parent = parent
-    
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 20)
     title.BackgroundTransparency = 1
@@ -65,7 +64,6 @@ local function createSection(parent, titleText, descText)
     title.TextSize = 11
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = section
-    
     local desc = Instance.new("TextLabel")
     desc.Size = UDim2.new(1, 0, 0, 15)
     desc.Position = UDim2.fromOffset(0, 22)
@@ -85,31 +83,26 @@ local function createToggle(parent, titleText, descText, toggleInitial, callback
     card.Parent = parent
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 8) c.Parent = card
     local stroke = Instance.new("UIStroke") stroke.Color = C.border stroke.Thickness = 1 stroke.Transparency = 0.6 stroke.Parent = card
-
     local t = Instance.new("TextLabel")
     t.Size = UDim2.new(1, -80, 0, 18) t.Position = UDim2.fromOffset(12, 10)
     t.BackgroundTransparency = 1 t.Text = titleText t.TextColor3 = C.text
     t.Font = Enum.Font.GothamSemibold t.TextSize = 12 t.TextXAlignment = Enum.TextXAlignment.Left t.Parent = card
-
     local d = Instance.new("TextLabel")
     d.Size = UDim2.new(1, -80, 0, 14) d.Position = UDim2.fromOffset(12, 28)
     d.BackgroundTransparency = 1 d.Text = descText d.TextColor3 = C.textMuted
     d.Font = Enum.Font.Gotham d.TextSize = 9 d.TextXAlignment = Enum.TextXAlignment.Left d.Parent = card
-
     local toggle = Instance.new("TextButton")
     toggle.AnchorPoint = Vector2.new(1, 0.5) toggle.Position = UDim2.new(1, -12, 0.5, 0)
     toggle.Size = UDim2.fromOffset(38, 20)
     toggle.BackgroundColor3 = toggleInitial and C.accent or C.surfaceAlt
     toggle.AutoButtonColor = false toggle.Text = "" toggle.Parent = card
     local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(1, 0) tc.Parent = toggle
-
     local knob = Instance.new("Frame")
     knob.Size = UDim2.fromOffset(14, 14)
     knob.Position = toggleInitial and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
     knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     knob.Parent = toggle
     local kc = Instance.new("UICorner") kc.CornerRadius = UDim.new(1, 0) kc.Parent = knob
-
     local state = toggleInitial
     toggle.MouseButton1Click:Connect(function()
         state = not state
@@ -153,6 +146,26 @@ local function updateScale()
 end
 updateScale()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+
+local islandFrame = Instance.new("Frame")
+islandFrame.Name = "DynamicIsland"
+islandFrame.Size = UDim2.fromOffset(150, 35)
+islandFrame.Position = UDim2.new(0.5, 0, 0, 15)
+islandFrame.AnchorPoint = Vector2.new(0.5, 0)
+islandFrame.BackgroundColor3 = C.surface
+islandFrame.Visible = false
+islandFrame.ZIndex = 5
+islandFrame.Parent = gui
+local islandCorner = Instance.new("UICorner") islandCorner.CornerRadius = UDim.new(1, 0) islandCorner.Parent = islandFrame
+local islandStroke = Instance.new("UIStroke") islandStroke.Color = C.border islandStroke.Thickness = 1 islandStroke.Parent = islandFrame
+local islandText = Instance.new("TextLabel") 
+islandText.Size = UDim2.fromScale(1, 1) 
+islandText.BackgroundTransparency = 1 
+islandText.Text = "KURO ISLAND" 
+islandText.TextColor3 = C.accent 
+islandText.Font = Enum.Font.GothamBold 
+islandText.TextSize = 10 
+islandText.Parent = islandFrame
 
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
@@ -372,6 +385,10 @@ local function applyTheme(themeName)
     headerFix.BackgroundColor3 = C.surface
     title.TextColor3 = C.text
     subGreet.TextColor3 = C.accent
+    
+    islandFrame.BackgroundColor3 = C.surface
+    islandStroke.Color = C.border
+    islandText.TextColor3 = C.accent
 
     for tName, btn in pairs(tabButtons) do
         local isActive = (tName == CurrentTab)
@@ -413,28 +430,35 @@ local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 8) hc.Parent =
 
 local function minimizeToIsland()
     IsMinimized = true
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(200, 40), BackgroundColor3 = C.surface, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-    tween(mainCorner, 0.4, {CornerRadius = UDim.new(1, 0)}):Play()
-    mainStroke.Transparency = 1; tabBar.Visible = false; content.Visible = false; settingsPanel.Visible = false
-    title.Text = "KURO"; title.TextSize = 13; minBtn.Text = "□"
+    main.Visible = false
+    islandFrame.Visible = true
+    islandFrame.Size = UDim2.fromOffset(0, 35)
+    tween(islandFrame, 0.3, {Size = UDim2.fromOffset(160, 35)}, Enum.EasingStyle.Back):Play()
 end
 
 local function restoreFromIsland()
     IsMinimized = false
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
-    tween(mainCorner, 0.4, {CornerRadius = UDim.new(0, 14)}):Play()
-    mainStroke.Transparency = 0; tabBar.Visible = true; content.Visible = true; title.Text = "KURO HUB"; title.TextSize = 15; minBtn.Text = "—"
+    tween(islandFrame, 0.3, {Size = UDim2.fromOffset(0, 35)}, Enum.EasingStyle.Back):Play()
+    task.delay(0.3, function()
+        islandFrame.Visible = false
+        main.Visible = true
+        
+        main.AnchorPoint = Vector2.new(0.5, 0.5)
+        main.Position = UDim2.fromScale(0.5, 0.5)
+        main.Size = UDim2.fromOffset(500, 380)
+    end)
 end
+
+islandFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        restoreFromIsland()
+    end
+end)
 
 hideBtn.MouseButton1Click:Connect(function() settingsPanel.Visible = false; minimizeToIsland() end)
 minBtn.MouseButton1Click:Connect(function() 
     if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; tabBar.Visible = true; return end
     if IsMinimized then restoreFromIsland() else minimizeToIsland() end 
-end)
-main.InputBegan:Connect(function(input) 
-    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
-        restoreFromIsland() 
-    end 
 end)
 
 setBtn.MouseButton1Click:Connect(function() 
@@ -460,19 +484,45 @@ yesBtn.MouseButton1Click:Connect(function()
 end)
 
 local dragging = false; local dragInput, dragStart, startPos
-header.InputBegan:Connect(function(input) 
+local function startDrag(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
         dragging = true; dragStart = input.Position; startPos = main.Position
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) 
-    end 
+        input.Changed:Connect(function() 
+            if input.UserInputState == Enum.UserInputState.End then 
+                dragging = false 
+            end 
+        end) 
+    end
+end
+header.InputBegan:Connect(startDrag)
+main.InputBegan:Connect(function(input) 
+    if not IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        if input.Position.Y > main.AbsolutePosition.Y + (main.AbsoluteSize.Y * 0.5) then
+            startDrag(input)
+        end
+    end
 end)
+
 header.InputChanged:Connect(function(input) 
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end 
 end)
+main.InputChanged:Connect(function(input) 
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end 
+end)
+
 UIS.InputChanged:Connect(function(input) 
     if input == dragInput and dragging and not IsMinimized then 
         local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) 
+        local newX = startPos.X.Offset + delta.X
+        local newY = startPos.Y.Offset + delta.Y
+        
+        local vp = workspace.CurrentCamera.ViewportSize
+        local mainSize = main.AbsoluteSize
+        
+        newX = math.clamp(newX, 0, vp.X - mainSize.X)
+        newY = math.clamp(newY, 0, vp.Y - mainSize.Y)
+        
+        main.Position = UDim2.fromOffset(newX, newY)
     end 
 end)
 
