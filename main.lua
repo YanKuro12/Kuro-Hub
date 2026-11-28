@@ -235,7 +235,8 @@ tabBar.Size = UDim2.new(1, -32, 0, 30) tabBar.Position = UDim2.fromOffset(16, 60
 tabBar.BackgroundTransparency = 1 tabBar.ZIndex = 2 tabBar.Parent = main
 local tabScroll = Instance.new("ScrollingFrame") 
 tabScroll.Size = UDim2.fromScale(1, 1) tabScroll.BackgroundTransparency = 1 tabScroll.ScrollBarThickness = 0 
-tabScroll.CanvasSize = UDim2.new(0, 800, 0, 0) tabScroll.Parent = tabBar
+tabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+tabScroll.CanvasSize = UDim2.new(0, 0, 0, 0) tabScroll.Parent = tabBar
 local tabLayout = Instance.new("UIListLayout") tabLayout.FillDirection = Enum.FillDirection.Horizontal tabLayout.Padding = UDim.new(0, 4) tabLayout.Parent = tabScroll
 
 local content = Instance.new("Frame")
