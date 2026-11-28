@@ -10,51 +10,27 @@ local Themes = {
         surface=Color3.fromRGB(24,24,28), surfaceAlt=Color3.fromRGB(34,34,40),
         bg=Color3.fromRGB(14,14,17), border=Color3.fromRGB(65,60,45),
         text=Color3.fromRGB(245,243,235), textMuted=Color3.fromRGB(160,158,150),
-        font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
-        corner=14, tabStyle="pill", particles="✨", particleColor=Color3.fromRGB(255,220,120),
     },
     Obsidian = {
         name="Obsidian", accent=Color3.fromRGB(130,200,255), accent2=Color3.fromRGB(70,130,210),
         surface=Color3.fromRGB(20,22,28), surfaceAlt=Color3.fromRGB(28,30,38),
         bg=Color3.fromRGB(10,12,16), border=Color3.fromRGB(45,50,60),
         text=Color3.fromRGB(235,240,250), textMuted=Color3.fromRGB(140,150,170),
-        font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
-        corner=6, tabStyle="underline", particles="•", particleColor=Color3.fromRGB(120,200,255),
-    },
-    Halloween = {
-        name="Halloween", accent=Color3.fromRGB(230,130,30), accent2=Color3.fromRGB(150,60,180),
-        surface=Color3.fromRGB(30,20,40), surfaceAlt=Color3.fromRGB(40,28,52),
-        bg=Color3.fromRGB(14,10,20), border=Color3.fromRGB(85,45,110),
-        text=Color3.fromRGB(255,235,215), textMuted=Color3.fromRGB(180,160,200),
-        font=Enum.Font.GothamBlack, fontBody=Enum.Font.Gotham,
-        corner=10, tabStyle="pill", particles="🎃", particleColor=Color3.fromRGB(230,130,30),
     },
     Hacker = {
         name="Hacker", accent=Color3.fromRGB(0,210,110), accent2=Color3.fromRGB(0,150,80),
         surface=Color3.fromRGB(6,18,10), surfaceAlt=Color3.fromRGB(12,28,18),
         bg=Color3.fromRGB(2,10,5), border=Color3.fromRGB(0,80,40),
         text=Color3.fromRGB(200,255,220), textMuted=Color3.fromRGB(100,180,140),
-        font=Enum.Font.Code, fontBody=Enum.Font.Code,
-        corner=2, tabStyle="bracket", particles="01", particleColor=Color3.fromRGB(0,210,110),
     },
     Neon = {
         name="Neon", accent=Color3.fromRGB(255,80,200), accent2=Color3.fromRGB(80,220,255),
         surface=Color3.fromRGB(18,15,25), surfaceAlt=Color3.fromRGB(28,22,38),
         bg=Color3.fromRGB(8,5,12), border=Color3.fromRGB(200,50,180),
         text=Color3.fromRGB(255,255,255), textMuted=Color3.fromRGB(190,180,220),
-        font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
-        corner=0, tabStyle="pill", particles="✧", particleColor=Color3.fromRGB(80,220,255),
-    },
-    Cyberpunk = {
-        name="Cyberpunk", accent=Color3.fromRGB(240,210,0), accent2=Color3.fromRGB(0,140,240),
-        surface=Color3.fromRGB(22,18,12), surfaceAlt=Color3.fromRGB(32,26,16),
-        bg=Color3.fromRGB(12,10,6), border=Color3.fromRGB(200,170,0),
-        text=Color3.fromRGB(255,245,210), textMuted=Color3.fromRGB(190,170,140),
-        font=Enum.Font.Code, fontBody=Enum.Font.Code,
-        corner=2, tabStyle="bracket", particles="<", particleColor=Color3.fromRGB(0,140,240),
-    },
+    }
 }
-local ThemeOrder = {"Gold","Obsidian","Halloween","Hacker","Neon","Cyberpunk"}
+local ThemeOrder = {"Gold","Obsidian","Hacker","Neon"}
 
 _G.KuroAutoFarm = false; _G.KuroAutoSecret = false; _G.KuroAutoBuso = false
 _G.KuroAutoKen = false; _G.KuroRaidBuyChip = false; _G.KuroRaidFarm = false
@@ -144,36 +120,6 @@ local function createToggle(parent, titleText, descText, toggleInitial, callback
     end)
 end
 
-local function createDropdown(parent, titleText, options, callback)
-    local card = Instance.new("Frame")
-    card.Size = UDim2.new(1, -10, 0, 60)
-    card.BackgroundColor3 = C.surface
-    card.Parent = parent
-    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 8) c.Parent = card
-    local stroke = Instance.new("UIStroke") stroke.Color = C.border stroke.Thickness = 1 stroke.Transparency = 0.6 stroke.Parent = card
-
-    local t = Instance.new("TextLabel")
-    t.Size = UDim2.new(1, -24, 0, 18) t.Position = UDim2.fromOffset(12, 8)
-    t.BackgroundTransparency = 1 t.Text = titleText t.TextColor3 = C.text
-    t.Font = Enum.Font.GothamSemibold t.TextSize = 11 t.TextXAlignment = Enum.TextXAlignment.Left t.Parent = card
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -24, 0, 24) btn.Position = UDim2.fromOffset(12, 26)
-    btn.BackgroundColor3 = C.surfaceAlt btn.AutoButtonColor = false
-    btn.Text = "  " .. options[1] .. "  ▾" btn.TextColor3 = C.accent
-    btn.Font = Enum.Font.GothamSemibold btn.TextSize = 10
-    btn.TextXAlignment = Enum.TextXAlignment.Left btn.Parent = card
-    local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = btn
-
-    local idx = 1
-    btn.MouseButton1Click:Connect(function()
-        idx = idx + 1
-        if idx > #options then idx = 1 end
-        btn.Text = "  " .. options[idx] .. "  ▾"
-        if callback then callback(options[idx]) end
-    end)
-end
-
 local gui = Instance.new("ScreenGui")
 gui.Name = "KuroHubUI"
 gui.ResetOnSpawn = false
@@ -189,7 +135,6 @@ main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.Position = UDim2.fromScale(0.5, 0.5)
 main.Size = UDim2.fromOffset(500, 380)
 main.BackgroundColor3 = C.bg
-main.BackgroundTransparency = 1
 main.BorderSizePixel = 0
 main.Active = true
 main.ClipsDescendants = true
@@ -222,13 +167,6 @@ title.Size = UDim2.new(1, -180, 1, 0) title.Position = UDim2.fromOffset(16, 0)
 title.BackgroundTransparency = 1 title.Text = "KURO HUB"
 title.TextColor3 = C.text title.Font = Enum.Font.GothamBold
 title.TextSize = 15 title.TextXAlignment = Enum.TextXAlignment.Left title.ZIndex = 3 title.Parent = header
-
-local searchFrame = Instance.new("Frame")
-searchFrame.AnchorPoint = Vector2.new(1, 0.5) searchFrame.Position = UDim2.new(1, -130, 0.5, 0)
-searchFrame.Size = UDim2.fromOffset(100, 24) searchFrame.BackgroundColor3 = C.surfaceAlt searchFrame.ZIndex = 3 searchFrame.Parent = header
-local searchCorner = Instance.new("UICorner") searchCorner.CornerRadius = UDim.new(0, 6) searchCorner.Parent = searchFrame
-local searchIcon = Instance.new("TextLabel") searchIcon.Size = UDim2.fromOffset(20, 24) searchIcon.BackgroundTransparency = 1 searchIcon.Text = "🔍" searchIcon.TextSize = 10 searchIcon.Parent = searchFrame
-local searchBox = Instance.new("TextBox") searchBox.Size = UDim2.new(1, -24, 1, 0) searchBox.Position = UDim2.fromOffset(20, 0) searchBox.BackgroundTransparency = 1 searchBox.Text = "" searchBox.PlaceholderText = "Search..." searchBox.PlaceholderColor3 = C.textMuted searchBox.TextColor3 = C.text searchBox.Font = Enum.Font.Gotham searchBox.TextSize = 10 searchBox.TextXAlignment = Enum.TextXAlignment.Left searchBox.Parent = searchFrame
 
 local btnContainer = Instance.new("Frame")
 btnContainer.AnchorPoint = Vector2.new(1, 0.5) btnContainer.Position = UDim2.new(1, -12, 0.5, 0)
@@ -380,7 +318,6 @@ createToggle(mainPage, "Auto Secret Quests", "Completes Secret Quests.", false, 
 
 local raidPage = pages["RAID"]
 createSection(raidPage, "Normal Raid", "Fitur untuk semua jenis raid (kecuali Law).")
-createDropdown(raidPage, "Choice Raid", {"Flame", "Ice", "Dark", "Sand", "Quake", "Buddha", "Spider", "Dough", "Phoenix"}, function(val) _G.KuroRaidChoice = val end)
 createToggle(raidPage, "Auto Buy Chip", "Beli chip raid otomatis.", false, function(s) _G.KuroRaidBuyChip = s end)
 createToggle(raidPage, "Auto Farm Raid", "Kill NPC & pindah island.", false, function(s) _G.KuroRaidFarm = s end)
 createToggle(raidPage, "Instant Kill NPC", "Bunuh bos secara instan.", false, function(s) _G.KuroRaidKill = s end)
@@ -422,59 +359,6 @@ local yc = Instance.new("UICorner") yc.CornerRadius = UDim.new(0, 6) yc.Parent =
 local noBtn = Instance.new("TextButton") noBtn.Size = UDim2.fromOffset(80, 30) noBtn.Position = UDim2.new(0.5, 10, 1, -50) noBtn.BackgroundColor3 = C.surfaceAlt noBtn.Text = "Batal" noBtn.TextColor3 = C.text noBtn.Font = Enum.Font.GothamBold noBtn.TextSize = 11 noBtn.Parent = confirmFrame
 local nc = Instance.new("UICorner") nc.CornerRadius = UDim.new(0, 6) nc.Parent = noBtn
 
-local function createLandscape(T)
-    local existing = main:FindFirstChild("LandscapeLayer")
-    if existing then existing:Destroy() end
-
-    local layer = Instance.new("Frame")
-    layer.Name = "LandscapeLayer"
-    layer.Size = UDim2.fromScale(1, 1)
-    layer.BackgroundColor3 = T.bg
-    layer.BorderSizePixel = 0
-    layer.ZIndex = 0
-    layer.ClipsDescendants = true
-    layer.Parent = main
-    
-    local uc = Instance.new("UICorner") 
-    uc.CornerRadius = UDim.new(0, 14)
-    uc.Parent = layer
-
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, T.bg),
-        ColorSequenceKeypoint.new(0.5, T.surface),
-        ColorSequenceKeypoint.new(1, T.bg),
-    }
-    grad.Rotation = 90
-    grad.Parent = layer
-
-    if T.particles then
-        task.spawn(function()
-            while layer.Parent do
-                local p = Instance.new("TextLabel")
-                p.Size = UDim2.fromOffset(16,16)
-                p.BackgroundTransparency = 1
-                p.Text = T.particles
-                p.TextColor3 = T.particleColor
-                p.TextTransparency = 0.5
-                p.Font = Enum.Font.GothamBold
-                p.TextSize = 12
-                p.Position = UDim2.new(math.random(), 0, 1.05, 0)
-                p.Parent = layer
-                
-                local dur = math.random(30, 80) / 10
-                local tx = TS:Create(p, TweenInfo.new(dur, Enum.EasingStyle.Linear), {
-                    Position = UDim2.new(math.random(), 0, -0.1, 0),
-                    TextTransparency = 1
-                })
-                tx:Play()
-                tx.Completed:Connect(function() p:Destroy() end)
-                task.wait(0.3)
-            end
-        end)
-    end
-end
-
 local function applyTheme(themeName)
     local T = Themes[themeName]
     if not T then return end
@@ -482,8 +366,7 @@ local function applyTheme(themeName)
     C.accent=T.accent; C.surface=T.surface; C.surfaceAlt=T.surfaceAlt
     C.bg=T.bg; C.border=T.border; C.text=T.text; C.textMuted=T.textMuted
 
-    createLandscape(T)
-
+    main.BackgroundColor3 = C.bg
     mainStroke.Color = C.border
     header.BackgroundColor3 = C.surface
     headerFix.BackgroundColor3 = C.surface
@@ -498,8 +381,8 @@ local function applyTheme(themeName)
 
     for _, d in ipairs(main:GetDescendants()) do
         if d:IsA("Frame") or d:IsA("TextButton") or d:IsA("TextLabel") then
-            if d:FindFirstChildOfClass("UICorner") and d~=main and d~=header and d.Name~="LandscapeLayer" then
-                d:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, T.corner)
+            if d:FindFirstChildOfClass("UICorner") and d~=main and d~=header then
+                d:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, 8)
             end
             if d:FindFirstChildOfClass("UIStroke") and d~=main then
                 local s = d:FindFirstChildOfClass("UIStroke")
@@ -530,14 +413,15 @@ local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 8) hc.Parent =
 
 local function minimizeToIsland()
     IsMinimized = true
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(280, 40), BackgroundColor3 = C.surface, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 15), Size = UDim2.fromOffset(200, 40), BackgroundColor3 = C.surface, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(1, 0)}):Play()
-    mainStroke.Transparency = 1; tabBar.Visible = false; content.Visible = false; title.Text = "KURO"; title.TextSize = 13; minBtn.Text = "□"
+    mainStroke.Transparency = 1; tabBar.Visible = false; content.Visible = false; settingsPanel.Visible = false
+    title.Text = "KURO"; title.TextSize = 13; minBtn.Text = "□"
 end
 
 local function restoreFromIsland()
     IsMinimized = false
-    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg, BackgroundTransparency = 1}, Enum.EasingStyle.Back):Play()
+    tween(main, 0.4, {AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(500, 380), BackgroundColor3 = C.bg, BackgroundTransparency = 0}, Enum.EasingStyle.Back):Play()
     tween(mainCorner, 0.4, {CornerRadius = UDim.new(0, 14)}):Play()
     mainStroke.Transparency = 0; tabBar.Visible = true; content.Visible = true; title.Text = "KURO HUB"; title.TextSize = 15; minBtn.Text = "—"
 end
@@ -547,7 +431,11 @@ minBtn.MouseButton1Click:Connect(function()
     if settingsPanel.Visible then settingsPanel.Visible = false; content.Visible = true; tabBar.Visible = true; return end
     if IsMinimized then restoreFromIsland() else minimizeToIsland() end 
 end)
-main.InputBegan:Connect(function(input) if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then restoreFromIsland() end end)
+main.InputBegan:Connect(function(input) 
+    if IsMinimized and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
+        restoreFromIsland() 
+    end 
+end)
 
 setBtn.MouseButton1Click:Connect(function() 
     if IsMinimized then return end
@@ -578,9 +466,11 @@ header.InputBegan:Connect(function(input)
         input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) 
     end 
 end)
-header.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+header.InputChanged:Connect(function(input) 
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end 
+end)
 UIS.InputChanged:Connect(function(input) 
-    if input == dragInput and dragging then 
+    if input == dragInput and dragging and not IsMinimized then 
         local delta = input.Position - dragStart
         main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) 
     end 
@@ -588,11 +478,3 @@ end)
 
 switchTab("Status")
 applyTheme("Gold")
-
-task.spawn(function()
-    task.wait(0.5)
-    local oldPos = main.Position
-    main.Position = UDim2.new(oldPos.X.Scale, oldPos.X.Offset + 1, oldPos.Y.Scale, oldPos.Y.Offset)
-    task.wait(0.1)
-    main.Position = oldPos
-end)
