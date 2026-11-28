@@ -15,18 +15,18 @@ end)
 if not ok or not Themes then
     Themes = {
         Gold = {
-            name="Gold", accent=Color3.fromRGB(212,175,55), accent2=Color3.fromRGB(255,230,150),
-            surface=Color3.fromRGB(24,24,28), surfaceAlt=Color3.fromRGB(32,32,38),
-            bg=Color3.fromRGB(14,14,17), border=Color3.fromRGB(60,55,40),
-            text=Color3.fromRGB(240,238,230), textMuted=Color3.fromRGB(150,148,140),
+            name="Gold", accent=Color3.fromRGB(218,180,90), accent2=Color3.fromRGB(255,225,150),
+            surface=Color3.fromRGB(24,24,28), surfaceAlt=Color3.fromRGB(34,34,40),
+            bg=Color3.fromRGB(14,14,17), border=Color3.fromRGB(65,60,45),
+            text=Color3.fromRGB(245,243,235), textMuted=Color3.fromRGB(160,158,150),
             font=Enum.Font.GothamBold, fontBody=Enum.Font.Gotham,
             corner=14, cornerHeader=18, strokeThickness=1, strokeTransparency=0.4,
-            tabStyle="pill", glow=false, particles="✨", particleColor=Color3.fromRGB(255,220,120),
-            glass=0.9, shimmer=true, sound="rbxassetid://6944742108",
+            tabStyle="pill", glow=true, particles="✨", particleColor=Color3.fromRGB(255,220,120),
+            glass=0.85, shimmer=true, sound="rbxassetid://6944742108",
         },
     }
 end
-local ThemeOrder = {"Gold","Obsidian","Halloween","Hacker","Christmas","Valentine"}
+local ThemeOrder = {"Gold","Obsidian","Halloween","Hacker","Christmas","Valentine","Neon","Cyberpunk","Custom"}
 
 _G.KuroAutoFarm = false; _G.KuroAutoSecret = false; _G.KuroAutoBuso = false
 _G.KuroAutoKen = false; _G.KuroRaidBuyChip = false; _G.KuroRaidFarm = false
@@ -145,7 +145,7 @@ local function createDropdown(parent, titleText, options, callback)
     btn.Text = "  " .. options[1] .. "  ▾" btn.TextColor3 = C.accent
     btn.Font = Enum.Font.GothamSemibold btn.TextSize = 10
     btn.TextXAlignment = Enum.TextXAlignment.Left btn.Parent = card
-    local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = card
+    local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = btn
 
     local idx = 1
     btn.MouseButton1Click:Connect(function()
@@ -383,9 +383,89 @@ local spScroll = Instance.new("ScrollingFrame") spScroll.Size = UDim2.fromScale(
 local spLayout = Instance.new("UIListLayout") spLayout.Padding = UDim.new(0, 10) spLayout.Parent = spScroll
 local spPad = Instance.new("UIPadding") spPad.PaddingTop = UDim.new(0, 10) spPad.PaddingLeft = UDim.new(0, 10) spPad.PaddingRight = UDim.new(0, 10) spPad.Parent = spScroll
 
-local themeCard = Instance.new("Frame") themeCard.Size = UDim2.new(1, -10, 0, 130) themeCard.BackgroundColor3 = C.surface themeCard.Parent = spScroll
+local themeCard = Instance.new("Frame") themeCard.Size = UDim2.new(1, -10, 0, 160) themeCard.BackgroundColor3 = C.surface themeCard.Parent = spScroll
 local tcCorner = Instance.new("UICorner") tcCorner.CornerRadius = UDim.new(0, 8) tcCorner.Parent = themeCard
 local themeLbl = Instance.new("TextLabel") themeLbl.Size = UDim2.new(1, -20, 0, 20) themeLbl.Position = UDim2.fromOffset(10, 8) themeLbl.BackgroundTransparency = 1 themeLbl.Text = "CHANGE THEME" themeLbl.TextColor3 = C.text themeLbl.Font = Enum.Font.GothamBold themeLbl.TextSize = 12 themeLbl.TextXAlignment = Enum.TextXAlignment.Left themeLbl.Parent = themeCard
+
+local colorCard = Instance.new("Frame") 
+colorCard.Size = UDim2.new(1, -10, 0, 120) 
+colorCard.BackgroundColor3 = C.surface 
+colorCard.Parent = spScroll
+local ccCorner = Instance.new("UICorner") ccCorner.CornerRadius = UDim.new(0, 8) ccCorner.Parent = colorCard
+local colorLbl = Instance.new("TextLabel") colorLbl.Size = UDim2.new(1, -20, 0, 20) colorLbl.Position = UDim2.fromOffset(10, 8) colorLbl.BackgroundTransparency = 1 colorLbl.Text = "RECOMMENDED COLORS" colorLbl.TextColor3 = C.text colorLbl.Font = Enum.Font.GothamBold colorLbl.TextSize = 12 colorLbl.TextXAlignment = Enum.TextXAlignment.Left colorLbl.Parent = colorCard
+
+local inputBg = Instance.new("TextBox")
+inputBg.Size = UDim2.new(0.45, -15, 0, 24)
+inputBg.Position = UDim2.fromOffset(10, 35)
+inputBg.BackgroundColor3 = C.surfaceAlt
+inputBg.TextColor3 = C.text
+inputBg.PlaceholderText = "Accent (Hex)"
+inputBg.Font = Enum.Font.Code
+inputBg.TextSize = 10
+inputBg.Parent = colorCard
+local ibc = Instance.new("UICorner") ibc.CornerRadius = UDim.new(0, 6) ibc.Parent = inputBg
+
+local inputBg2 = Instance.new("TextBox")
+inputBg2.Size = UDim2.new(0.45, -15, 0, 24)
+inputBg2.Position = UDim2.new(0.5, 5, 35, 0)
+inputBg2.BackgroundColor3 = C.surfaceAlt
+inputBg2.TextColor3 = C.text
+inputBg2.PlaceholderText = "BG (Hex)"
+inputBg2.Font = Enum.Font.Code
+inputBg2.TextSize = 10
+inputBg2.Parent = colorCard
+local ibc2 = Instance.new("UICorner") ibc2.CornerRadius = UDim.new(0, 6) ibc2.Parent = inputBg2
+
+local applyColorBtn = Instance.new("TextButton")
+applyColorBtn.Size = UDim2.new(1, -20, 0, 20)
+applyColorBtn.Position = UDim2.fromOffset(10, 65)
+applyColorBtn.BackgroundColor3 = C.accent
+applyColorBtn.Text = "Terapkan Custom Hex"
+applyColorBtn.TextColor3 = Color3.new(0,0,0)
+applyColorBtn.Font = Enum.Font.GothamBold
+applyColorBtn.TextSize = 9
+applyColorBtn.Parent = colorCard
+local acb = Instance.new("UICorner") acb.CornerRadius = UDim.new(0, 6) acb.Parent = applyColorBtn
+
+local presetColors = {
+    {name="Cyber Blue", accent="00A2FF", bg="0A121E"},
+    {name="Toxic Green", accent="39FF14", bg="0A1A0A"},
+    {name="Blood Red", accent="FF2A2A", bg="1A0A0A"},
+    {name="Sakura Pink", accent="FF8CB3", bg="1A0E14"},
+    {name="Golden", accent="FFD700", bg="1A160A"},
+    {name="Purple Haze", accent="A855F7", bg="140E1E"},
+}
+
+local presetContainer = Instance.new("Frame")
+presetContainer.Size = UDim2.new(1, -20, 0, 30)
+presetContainer.Position = UDim2.fromOffset(10, 90)
+presetContainer.BackgroundTransparency = 1
+presetContainer.Parent = colorCard
+local pcLayout = Instance.new("UIListLayout") pcLayout.FillDirection = Enum.FillDirection.Horizontal pcLayout.Padding = UDim.new(0, 4) pcLayout.Parent = presetContainer
+
+for i, preset in ipairs(presetColors) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.fromOffset(42, 24)
+    btn.BackgroundColor3 = Color3.fromHex(preset.accent)
+    btn.Text = preset.name
+    btn.TextColor3 = Color3.fromRGB(0,0,0)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 7
+    btn.TextScaled = false
+    btn.Parent = presetContainer
+    local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 4) c.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        Themes.Custom.accent = Color3.fromHex(preset.accent)
+        Themes.Custom.accent2 = Color3.fromHex(preset.accent):Lerp(Color3.new(1,1,1), 0.5)
+        Themes.Custom.bg = Color3.fromHex(preset.bg)
+        Themes.Custom.surface = Color3.fromHex(preset.bg):Lerp(Color3.new(1,1,1), 0.1)
+        Themes.Custom.surfaceAlt = Color3.fromRGB(preset.bg):Lerp(Color3.new(1,1,1), 0.2)
+        Themes.Custom.border = Color3.fromHex(preset.bg):Lerp(Color3.new(1,1,1), 0.3)
+        Themes.Custom.particleColor = Color3.fromHex(preset.accent)
+        applyTheme("Custom")
+    end)
+end
 
 local confirmFrame = Instance.new("Frame")
 confirmFrame.Size = UDim2.new(1, -32, 1, -110)
@@ -503,6 +583,25 @@ for i, tName in ipairs(ThemeOrder) do
     local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 6) c.Parent = btn
     btn.MouseButton1Click:Connect(function() applyTheme(tName) end)
 end
+
+applyColorBtn.MouseButton1Click:Connect(function()
+    local hexAccent = inputBg.Text
+    local hexBg = inputBg2.Text
+    
+    if #hexAccent == 6 then
+        Themes.Custom.accent = Color3.fromHex(hexAccent)
+        Themes.Custom.accent2 = Color3.fromHex(hexAccent):Lerp(Color3.new(1,1,1), 0.5)
+        Themes.Custom.particleColor = Color3.fromHex(hexAccent)
+    end
+    if #hexBg == 6 then
+        Themes.Custom.bg = Color3.fromHex(hexBg)
+        Themes.Custom.surface = Color3.fromHex(hexBg):Lerp(Color3.new(1,1,1), 0.1)
+        Themes.Custom.surfaceAlt = Color3.fromHex(hexBg):Lerp(Color3.new(1,1,1), 0.2)
+        Themes.Custom.border = Color3.fromHex(hexBg):Lerp(Color3.new(1,1,1), 0.3)
+    end
+    
+    applyTheme("Custom")
+end)
 
 local hideBtn = Instance.new("TextButton") hideBtn.Size = UDim2.new(1, -10, 0, 30) hideBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) hideBtn.Text = "Sembunyikan Hub (Hide)" hideBtn.TextColor3 = Color3.new(1,1,1) hideBtn.Font = Enum.Font.GothamBold hideBtn.Parent = spScroll
 local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(0, 8) hc.Parent = hideBtn
